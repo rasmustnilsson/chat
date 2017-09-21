@@ -1,0 +1,92 @@
+* {
+    font-family: sans-serif;
+    box-sizing: border-box;
+}
+:root {
+    --main-padding: 40px
+}
+html,body {
+    height: 100%;
+}
+body {
+    margin: 0;
+    padding: 0;
+}
+.logged_in {
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:    "header header"
+                            "rooms chat";
+}
+ul {
+    padding: 0;
+    list-style: none;
+}
+.chatWindow {
+    grid-area: chat;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    overflow-y: hidden;
+}
+header {
+    grid-area: header;
+    padding: var(--main-padding);
+    padding-top: 0;
+}
+.logout_form {
+    display: inline-block;
+}
+aside {
+    grid-area: rooms;
+    padding: var(--main-padding);
+    padding-top: 0;
+}
+aside h3:first-of-type {
+    margin-top: 0;
+}
+.chat_input_form {
+    display: grid;
+    grid-template-columns: 5fr 2fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "textInput button";
+}
+.chat_input_form.text_input {
+    grid-area: textInput;
+}
+.chat_input_form.button {
+    grid-area: button;
+}
+.chatMessages {
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+}
+.message {
+    display: grid;
+    grid-template-areas: "img text empty";
+    justify-items: start;
+    grid-template-columns: auto auto 1fr;
+}
+body .user {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "empty text img";
+    justify-items: end;
+}
+.message img {
+    height: 28px;
+    grid-area: img;
+}
+.message span {
+    grid-area: text;
+}
+div.user {
+    text-align: right;
+}
+.hidden {
+    display: none;
+}
+.active {
+    text-decoration: underline;
+}

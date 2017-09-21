@@ -1,0 +1,44 @@
+doctype html
+html
+    include includes/head.pug
+    body.logged_in
+        header
+            h1= header
+            h3= username
+            a(href='/logout')
+                h4 logout
+        aside
+            div#chatList
+                h3 Friends
+                ul
+                    li(v-for="(friend, index) in friends" v-on:click='selectDm(index)')
+                        span {{friend[0]}}
+                        span(v-if='!friend[3]') {{friend[2]}}
+                h3 Rooms
+                ul
+                    li(v-for="(room, index) in rooms" v-on:click='selectChat(index)')
+                        span {{room[0]}}
+                        span(v-if='!room[2]') {{room[1]}}
+            form(id="addFriendForm" onsubmit="return false" v-on:submit="sendFriendRequest")
+                input(type="text" v-model="friend" placeholder="username")
+                input(type="submit" value="add")
+            div#friend_requests
+                h3(v-bind:class="{'hidden': frh(ifr)}") Friend requests
+                ul
+                    li(v-for="(request,index) in ifr")
+                        span {{request}}
+                        button(v-on:click='confirmFriendRequest(index)') add
+                h3(v-bind:class="{'hidden': frh(sfr)}") Pending friend requests
+                ul
+                    li(v-for="(request,index) in sfr")
+                        span {{request}}
+                        button(v-on:click="cfr(index)") cancel
+        section.chatWindow
+            div#chatMessages.chatMessages
+                    div(v-for="message in messages" :class='message[1]' class="message")
+                        img(src="pub_files/profile_pictures/default.png" alt="Profile Picture" :class='message[1]')
+                        span {{message[0]}}
+            form(id="messageForm" onsubmit="return false" v-on:submit="sendMessage" class="chat_input_form")
+                input(type="text" v-model="message" class="text_input" autofocus)
+                input(type="submit" value="send" class="button")
+        include includes/bottom.pug
