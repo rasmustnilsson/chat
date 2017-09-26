@@ -1,5 +1,6 @@
 var bcrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
+var fs = require('fs-extra');
 
 mongoose.Promise = require('bluebird');
 mongoose.connect("mongodb://localhost:27017/users",{useMongoClient:true});
@@ -10,6 +11,8 @@ var userSchema = mongoose.Schema({
         friends: [],
         sfr: [],
         ifr: [],
+        profile_picture_index: {type: Number, default:0},
+        profile_pictures: {type: Array, default: ['default']},
         nfr: { type: Boolean, default: true },
         reg_date: { type: Date, default: Date.now },
         rooms: {type: Array, default: [['default',0,true],['memes',0,true]]},
@@ -22,5 +25,11 @@ userSchema.methods.generateHash = function(password) {
 userSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
+
+userSchema.methods.createFolders = function(user) {
+    fs.mkdir('views/pub_files/' + user, function() {
+        fs.mkdir('views/pub_files/' + user + '/profile_pictures');
+    });
+}
 
 module.exports = mongoose.model('User', userSchema);

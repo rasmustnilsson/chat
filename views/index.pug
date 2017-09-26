@@ -5,8 +5,10 @@ html
         header
             h1= header
             h3= username
-            a(href='/logout')
-                h4 logout
+            h4
+                a(href='/settings') settings
+            h4
+                a(href='/logout')  logout
         aside
             div#chatList
                 h3 Friends
@@ -35,8 +37,8 @@ html
                         button(v-on:click="cfr(index)") cancel
         section.chatWindow
             div#chatMessages.chatMessages
-                    div(v-for="message in messages" :class='message[1]' class="message")
-                        img(src="pub_files/profile_pictures/default.png" alt="Profile Picture" :class='message[1]')
+                    div(v-for="(message, index) in messages" :class='message[1]' class="message")
+                        img(v-bind:src="imgSrc(message[2])" alt="Profile Picture" :class='message[1]')
                         span {{message[0]}}
             form(id="messageForm" onsubmit="return false" v-on:submit="sendMessage" class="chat_input_form")
                 input(type="text" v-model="message" class="text_input" autofocus)

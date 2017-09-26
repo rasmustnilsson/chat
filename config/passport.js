@@ -12,7 +12,6 @@ module.exports = function(passport) {
             done(err, user);
         });
     });
-
     passport.use('local-signup', new LocalStrategy({
         usernameField : 'username',
         passwordField : 'password',
@@ -28,6 +27,7 @@ module.exports = function(passport) {
                     var newUser = new User();
                     newUser.username = username;
                     newUser.password = newUser.generateHash(password);
+                    newUser.createFolders(username);
                     newUser.save(function(err) {
                         if (err) throw err;
                         return done(null, newUser);

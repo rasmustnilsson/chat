@@ -1,5 +1,6 @@
 var express = require('express');
 var session = require('express-session');
+var fileUpload = require('express-fileupload');
 var pug = require('pug');
 var app = express();
 var path = require('path');
@@ -25,7 +26,7 @@ var session = session({ // session settings
     store: sessionStore,
 });
 
-var io = require('socket.io')(server);
+var io = require('socket.io')(server); // opens socket.io server
 
 require('./config/passport')(passport); // loads passport
 
@@ -33,6 +34,7 @@ app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());app.use(cookieParser());
+app.use(fileUpload());
 app.use(session);
 
 app.use(passport.initialize());
@@ -41,6 +43,9 @@ app.use(passport.session());
 io.use(sharedsession(session, { // allows socket io to access session
     autosave: true
 }))
-var socket = require("./app/socket")(io);
+io.of('/settings').use(sharedsession(session, {
+    autoSave: true
+}));
+var socket = require("./app/socket")(app,io);
 //Loads routes
 require('./app/routes.js')(app,passport,io,session);

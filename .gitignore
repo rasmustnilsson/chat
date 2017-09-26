@@ -1,0 +1,7 @@
+node_modules/
+package-lock.json
+.package.swap
+.package.json.swap
+views/pub_files/*
+!views/pub_files/icons/
+!views/pub_files/profiles_pictures/

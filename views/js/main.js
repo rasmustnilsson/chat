@@ -1,5 +1,5 @@
 var socket = io.connect(window.location.href.split("/")[2]);
-let i, username,j;
+let i, username,j,list;
 
 socket.on("incoming_friend_requests", function(data) {
     for (i = 0; i < data.length; i++) {
@@ -58,10 +58,15 @@ socket.on("fr_noUser", function(user) {
 })
 socket.on("userinfo", function(data) { // initial user info
     username = data.username;
-    chatList.friends = data.friends;
+    //chatList.friends = [];
+    for (i = 0; i < data.friends.length; i++) {
+        //chatList.friends.push([data.friends[i].name,data.friends[i].id,data.friends[i].anm,data.friends[i].nm]);
+        //console.log([data.friends[i].name,data.friends[i].id,data.friends[i].anm,data.friends[i].nm])
+    }
     friendRequests.ifr = data.ifr;
     friendRequests.sfr = data.sfr;
     chatList.rooms = data.rooms;
+    chatList.friends = data.friends;
 })
 socket.on("chatMessages", function(data) { //builds chat
         buildChat(data);

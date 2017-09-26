@@ -3,7 +3,8 @@
     box-sizing: border-box;
 }
 :root {
-    --main-padding: 40px
+    --default-padding: 40px;
+    --default-pp-size: 200px
 }
 html,body {
     height: 100%;
@@ -32,7 +33,7 @@ ul {
 }
 header {
     grid-area: header;
-    padding: var(--main-padding);
+    padding: var(--default-padding);
     padding-top: 0;
 }
 .logout_form {
@@ -40,7 +41,7 @@ header {
 }
 aside {
     grid-area: rooms;
-    padding: var(--main-padding);
+    padding: var(--default-padding);
     padding-top: 0;
 }
 aside h3:first-of-type {
@@ -89,4 +90,32 @@ div.user {
 }
 .active {
     text-decoration: underline;
+}
+.settings img {
+    height: var(--default-pp-size);
+    width: var(--default-pp-size);
+    object-fit: contain;
+    max-width: 100%
+}
+article {
+    padding: var(--default-padding);
+    padding-top: 0;
+}
+.profile_picture_container {
+    overflow-x: auto;
+    display: flex;
+}
+.pp {
+    padding: 0 16px;
+    position: relative;
+}
+.pp_options {
+    height: var(--default-pp-size);
+    width: var(--default-pp-size);
+    position: absolute;
+    top: 0;
+}
+.pp_options .icon {
+    height: 24px;
+    width: 24px;
 }

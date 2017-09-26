@@ -1,0 +1,34 @@
+doctype html
+html
+    include includes/head.pug
+    body
+        header
+            h1 settings
+            h3= username
+            h4
+                a(href='/') go back
+            h4
+                a(href='/logout') logout
+        article#settings.settings
+            form
+                span Display name: 
+                    input(type='text' placeholder=username)
+                input(type='submit' value='change')
+            h3 Remove Account
+                form(method='post' action='/removeAccount')
+                    input(type='submit' value='Remove')
+            h3 Change profile picture:
+            div.profile_picture_container
+                span.pp(v-for='(image,index) in profile_pictures')
+                    img(:src='image' alt='profile picture')
+                    div.pp_options
+                        img(v-if='index != 0' src='pub_files/icons/ic_delete_black_24dp_1x.png' class='icon' v-on:click='deleteProfilePicture(image)')
+                        input(v-if='index != 0' type='radio' name='profile_picture')
+            h3 Upload new picture
+            div(v-if='!image')
+                input(type='file' @change='onFileChange')
+            div(v-else)
+                img(:src="image" id='croppImage')
+                button(v-on:click='uploadPicture') upload
+                button(v-on:click='removeImage') cancel
+    include includes/bottom.pug

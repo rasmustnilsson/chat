@@ -8,31 +8,23 @@ var chatList = new Vue({
     methods: {
         selectChat: function(index) {
             this.currRoom = this.rooms[index];
-            Vue.set(this.rooms, index, this.rooms[index]);
-            this.rooms[index][1] = 0;
-            this.rooms[index][2] = true;
+            Vue.set(this.rooms, index, [this.rooms[index][0],0,true]);
             socket.emit("getMessages",this.currRoom[0]);
         },
 		selectDm: function(index) {
-			this.currRoom[0] = this.friends[index][1];
-            Vue.set(this.friends, index, this.friends[index]);
-            this.friends[index][2] = 0;
-            this.friends[index][3] = true;
+            this.currRoom[0] = this.friends[index][1];
+            Vue.set(this.friends,index, [this.friends[index][0],this.friends[index][1],0,true]);
             socket.emit("getMessages",this.currRoom[0]);
 		},
         addMessageNotification: function(room) {
             for(i=0;i<this.friends.length;i++) {
                 if(this.friends[i][1] == room) {
-                    Vue.set(this.friends, i, this.friends[i]);
-                    this.friends[i][2] += 1;
-                    this.friends[i][3] = false;
+                    Vue.set(this.friends, i, [this.friends[i][0],this.friends[i][1],this.friends[i][2]+1,false]);
                 }
             }
             for(j=0;j<this.rooms.length;j++) {
                 if(this.rooms[j][0] == room) {
-                    Vue.set(this.rooms, j, this.rooms[j]);
-                    this.rooms[j][1] += 1;
-                    this.rooms[j][2] = false;
+                    Vue.set(this.rooms, j, [this.rooms[j][0],this.rooms[j][1] +1,false]);
                 }
             }
         }
@@ -54,6 +46,9 @@ var chatMessages = new Vue({
                 var chat = document.getElementById("chatMessages");
                 chat.scrollTop = chat.scrollHeight;
             })
+        },
+        imgSrc: function(user) {
+            return '/pub_files/profile_pictures/' + user;
         }
     }
 })

@@ -3,7 +3,40 @@ var queries = require("./databaseQueries");
 let i,j;
 var users = [];
 
-module.exports = function(io) {
+module.exports = function(app,io) {
+
+    var settingsPage = io.of('/settings');
+
+    settingsPage.on('connection', function(socket) {
+        queries.users.getinfo(socket.handshake.session.passport.user, function(user) {
+            for(i=0;i<user.profile_pictures.length;i++) {
+                if(i==0) {
+                    user.profile_pictures[i] = '/pub_files/profile_pictures/default.png';
+                } else {
+                    user.profile_pictures[i] = 'pub_files/' + user.username + '/profile_pictures/' + user.profile_pictures[i];
+                }
+            }
+            socket.emit("userinfo", { // emits initial info
+                username:user.username,
+                profile_pictures: user.profile_pictures,
+                friends: user.friends,
+                rooms: user.rooms,
+                sfr:user.sfr,
+                ifr:user.ifr,
+                nfr:user.nfr,
+            });
+            socket.on("deleteProfilePicture", function(picture) { // deletes picture
+                queries.account.deleteProfilePicture(user.username,picture, function(bool,index,err) {
+                if(bool) {
+                    socket.emit('ppDeleted',true,index);
+                } else {
+                    socket.emit('ppDeleted',false,0,err);
+                }
+                })
+            })
+        })
+    })
+
     io.on('connection', function (socket) {
         socket.on('disconnect', function() {
             for(i=0;i<users.length;i++) {
@@ -25,13 +58,19 @@ module.exports = function(io) {
             for(i=0;i<user.friends.length;i++) {
                 socket.join(user.friends[i][1])
             }
+            var friends = []
+            for(i=0;i<user.friends.length;i++) {
+                friends.push(Object.values(user.friends[i]))
+                //console.log(friends)
+            }
             socket.emit("userinfo", {
                 username:user.username,
-                friends: user.friends,
+                friends: friends,
                 rooms: user.rooms,
+                profile_picture: user.profile_pictures[user.profile_picture_index],
                 sfr:user.sfr,
                 ifr:user.ifr,
-                nfr:user.nfr
+                nfr:user.nfr,
             });
             queries.get("default", function(msgs) {
                 socket.emit("chatMessages", msgs);
@@ -68,7 +107,7 @@ module.exports = function(io) {
             })
             socket.on("confirmFriend", function(friend) { // confirms friend request
                 var rndhex = Math.floor(Math.random()*268435455).toString(16);
-                queries.afr(user.username,friend,rndhex,function(bool,err) {
+                queries.afr(user.username,friend,rndhex,function() {
                     socket.emit("fa",[friend,rndhex,0,true]);
                     socket.join(rndhex);
                     for(i=0;i<users.length;i++) {
