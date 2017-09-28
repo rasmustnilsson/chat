@@ -2,17 +2,19 @@ doctype html
 html
     include includes/head.pug
     body
-        header
-            h1 settings
-            h3= username
+        header.header
+            h1 Settings
+            h3 
+                span {{displayName}} 
+                span ({{username}})
             h4
                 a(href='/') go back
             h4
                 a(href='/logout') logout
-        article#settings.settings
-            form
+        article.settings
+            form(onsubmit='return false;' v-on:submit='changeDisplayName')
                 span Display name: 
-                    input(type='text' placeholder=username)
+                    input(type='text' placeholder=username v-model='newDisplayName')
                 input(type='submit' value='change')
             h3 Remove Account
                 form(method='post' action='/removeAccount')
@@ -21,9 +23,8 @@ html
             div.profile_picture_container
                 span.pp(v-for='(image,index) in profile_pictures')
                     img(:src='image' alt='profile picture')
-                    div.pp_options
+                    div.pp_options(v-bind:class='{selectedpp:profile_picture_index == index}' v-on:click='changeProfilePicture(index)')
                         img(v-if='index != 0' src='pub_files/icons/ic_delete_black_24dp_1x.png' class='icon' v-on:click='deleteProfilePicture(image)')
-                        input(v-if='index != 0' type='radio' name='profile_picture')
             h3 Upload new picture
             div(v-if='!image')
                 input(type='file' @change='onFileChange')

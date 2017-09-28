@@ -40,6 +40,7 @@ module.exports = function(app,passport,io) {
     app.get('/pub_files/profile_pictures/:username',loggedIn,function(req,res) {
         queries.account.getProfilePicture(req.params.username, function(src) {
             res.sendFile(__dirname.slice(0,__dirname.length-4) + src)
+            console.log('1')
         })
     })
     app.get('/settings',loggedIn, function(req,res) {
@@ -53,7 +54,7 @@ module.exports = function(app,passport,io) {
             if(err) return res.status(500).send(err);
             queries.account.uploadProfilePic(uploadedFile,req.user.username, function() {
                 if(err) throw err;
-                res.redirect('/settings');
+                res.send(true);
             });
         })
     });

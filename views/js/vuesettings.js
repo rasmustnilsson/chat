@@ -1,11 +1,14 @@
 var cropper;
 
+
 var settings = new Vue({
-    el: '#settings',
+    el: '.settings',
     data: {
         profile_pictures: [],
         image: '',
         imageName: '',
+        profile_picture_index: 0,
+        newDisplayName: '',
     },
     methods: {
         onFileChange: function(e) {
@@ -26,7 +29,15 @@ var settings = new Vue({
                 vm.imageName = file.name;
             };
             reader.readAsDataURL(file);
-
+        },
+        changeDisplayName: function() {
+            if(this.newDisplayName != '') {
+                socket.emit('changeDisplayName', this.newDisplayName);
+                this.newDisplayName = '';
+            }
+        },
+        changeProfilePicture: function(index) {
+            socket.emit('changeProfilePicture',index);
         },
         deleteProfilePicture: function(picture) {
             var name = picture.substring(picture.lastIndexOf('/')+1);
@@ -41,7 +52,9 @@ var settings = new Vue({
                     data: formData,
                     processData: false,
                     contentType: false,
-                });
+                }).then((response) => {
+                    location.reload();
+                })
             });
         },
         cropImage: function() {
@@ -56,5 +69,12 @@ var settings = new Vue({
             cropper.destroy();
             this.image = '';
         }
+    }
+})
+var header = new Vue({
+    el: '.header',
+    data: {
+        displayName: '',
+        username: '',
     }
 })

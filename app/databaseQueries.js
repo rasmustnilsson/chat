@@ -9,9 +9,17 @@ module.exports = {
         getinfo: function(id,callback) { // returns user info
             MongoClient.connect(urlUsers, function(err,db) {
                 db.collection("users").findOne(ObjectId(id), function(err,result) {
-                    db.close();
-                    if (err) throw err;
-                    return callback(result);
+                    for(var i=0;i<result.friends.length;i++) {
+                        (function() {
+                            var d = i;
+                            db.collection('users').findOne({username:result.friends[d].name},function(err,friendResult) {
+                                result.friends[d].displayName = friendResult.displayName;
+                                if(d == result.friends.length - 1) {
+                                    callback(result);
+                                }
+                            })
+                        })();
+                    }
                 })
             })
         }
@@ -80,6 +88,22 @@ module.exports = {
                             callback(true,pIndex);
                         })
                     }
+                })
+            })
+        },
+        changeProfilePicture: function(username,index,callback) {
+            MongoClient.connect(urlUsers, function(err,db) {
+                db.collection('users').update({username:username},{$set:{profile_picture_index:index}}, function(err) {
+                    if(err) throw err;
+                    callback();
+                })
+            })
+        },
+        changeDisplayName: function(username,newName,callback) {
+            MongoClient.connect(urlUsers, function(err,db) {
+                db.collection('users').update({username:username},{$set:{displayName:newName}}, function(err) {
+                    if(err) throw err;
+                    callback();
                 })
             })
         }

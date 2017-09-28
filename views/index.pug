@@ -4,7 +4,7 @@ html
     body.logged_in
         header
             h1= header
-            h3= username
+            h3= displayName
             h4
                 a(href='/settings') settings
             h4
@@ -14,7 +14,7 @@ html
                 h3 Friends
                 ul
                     li(v-for="(friend, index) in friends" v-on:click='selectDm(index)')
-                        span {{friend[0]}}
+                        span {{friend[4]}}
                         span(v-if='!friend[3]') {{friend[2]}}
                 h3 Rooms
                 ul

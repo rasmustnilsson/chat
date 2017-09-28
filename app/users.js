@@ -7,6 +7,7 @@ mongoose.connect("mongodb://localhost:27017/users",{useMongoClient:true});
 
 var userSchema = mongoose.Schema({
         username: String,
+        displayName: String,
         password: String,
         friends: [],
         sfr: [],

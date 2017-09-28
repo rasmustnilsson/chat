@@ -16,9 +16,20 @@ module.exports = function(app,io) {
                     user.profile_pictures[i] = 'pub_files/' + user.username + '/profile_pictures/' + user.profile_pictures[i];
                 }
             }
+            socket.on('changeProfilePicture', function(index) {
+                queries.account.changeProfilePicture(user.username,index,function() {
+                    socket.emit('profilePictureChanged',index);
+                })
+            })
+            socket.on('changeDisplayName', function(newName) {
+                queries.account.changeDisplayName(user.username,newName, function() {
+                        socket.emit('newDisplayName', newName);
+                })
+            })
             socket.emit("userinfo", { // emits initial info
                 username:user.username,
                 profile_pictures: user.profile_pictures,
+                profile_picture_index: user.profile_picture_index,
                 friends: user.friends,
                 rooms: user.rooms,
                 sfr:user.sfr,

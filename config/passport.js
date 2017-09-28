@@ -26,6 +26,7 @@ module.exports = function(passport) {
                 } else {
                     var newUser = new User();
                     newUser.username = username;
+                    newUser.displayName = username;
                     newUser.password = newUser.generateHash(password);
                     newUser.createFolders(username);
                     newUser.save(function(err) {

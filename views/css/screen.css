@@ -108,6 +108,7 @@ article {
 .pp {
     padding: 0 16px;
     position: relative;
+    cursor: pointer;
 }
 .pp_options {
     height: var(--default-pp-size);
@@ -118,4 +119,7 @@ article {
 .pp_options .icon {
     height: 24px;
     width: 24px;
+}
+.selectedpp {
+    border: 4px solid green;
 }
