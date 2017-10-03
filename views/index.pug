@@ -15,19 +15,19 @@ html
                 ul
                     li(v-for="(friend, index) in friends" v-cloak)
                         div.item-content(v-bind:class="{ active: currRoom[0] == friend[1]}")
-                            span(v-on:click='selectDm(index)') {{ friend[4] }}
+                            span(v-on:click='selectDm(index)' v-cloak) {{ friend[4] }}
                             span
-                                span(v-show='!friend[3]') {{ friend[2] }}
-                                span.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)') keyboard_arrow_up
+                                span(v-show='!friend[3]' v-cloak) {{ friend[2] }}
+                                span.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)' v-cloak) keyboard_arrow_up
                         div.friend-menu(v-bind:class="[friend[5] ? 'dropdown' : dropup(index)]")
                             p {{ friend[0] }}
-                            button() remove
+                            button(v-on:click='removeFriend(index)') remove
                 h3 Rooms
                 ul
                     li.item-content(v-for="(room, index) in rooms" v-on:click='selectChat(index)' v-bind:class="{ active: currRoom[0] == room[0]}")
-                        span {{room[0]}}
+                        span(v-cloak) {{room[0]}}
                         span
-                            span(v-show='!room[2]') {{room[1]}}
+                            span(v-show='!room[2]' v-cloak) {{room[1]}}
             form(id="addFriendForm" onsubmit="return false" v-on:submit="sendFriendRequest")
                 input(type="text" v-model="friend" placeholder="username")
                 input(type="submit" value="add")

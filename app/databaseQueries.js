@@ -29,26 +29,33 @@ module.exports = {
     },
     account: {
         removeAccount: function(username,callback) {
-                MongoClient.connect(urlUsers, function(err,db) {
-                    let i,j,k;
-                    db.collection('users').findOne({username:username}, function(err,result) {
-                        if(err) throw err;
-                        var user = result;
-                        for(i=0;i<user.friends.length;i++) {
-                            db.collection('users').update({username:user.friends[i].name}, {$pull: {friends: username}});
-                        }
-                        for(j=0;j<user.ifr.length;j++) {
-                            db.collection('users').update({username:user.ifr[j]}, {$pull: {sfr: username}});
-                        }
-                        for(k=0;k<user.sfr.length;k++) {
-                            db.collection('users').update({username:user.sfr[k]}, {$pull: {ifr: username}});
-                        }
-                        db.collection('users').remove({username: username});
-                        fs.remove('views/pub_files/' + username, function() {
-                            //callback();
-                        })
+            MongoClient.connect(urlUsers, function(err,db) {
+                let i,j,k;
+                db.collection('users').findOne({username:username}, function(err,result) {
+                    if(err) throw err;
+                    var user = result;
+                    for(i=0;i<user.friends.length;i++) {
+                        db.collection('users').update({username:user.friends[i].name}, {$pull: {friends: username}});
+                    }
+                    for(j=0;j<user.ifr.length;j++) {
+                        db.collection('users').update({username:user.ifr[j]}, {$pull: {sfr: username}});
+                    }
+                    for(k=0;k<user.sfr.length;k++) {
+                        db.collection('users').update({username:user.sfr[k]}, {$pull: {ifr: username}});
+                    }
+                    db.collection('users').remove({username: username});
+                    fs.remove('views/pub_files/' + username, function() {
+                        //callback();
                     })
                 })
+            })
+        },
+        removeFriend: function(username,friend,callback) {
+            MongoClient.connect(urlUsers,function(err,db) {
+                db.collection('users').update({username:username},{$pull:{friends:{name:friend}}});
+                db.collection('users').update({username:friend},{$pull:{friends:{name:username}}});
+                callback();
+            })
         },
         uploadProfilePic: function(picture,username,callback) { // saves profile_pictures and sets current
             MongoClient.connect(urlUsers, function(err,db) {

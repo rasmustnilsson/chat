@@ -13,6 +13,9 @@ var chatList = new Vue({
             Vue.set(this.rooms, index, [this.rooms[index][0],0,true]);
             socket.emit("getMessages",this.currRoom[0]);
         },
+        removeFriend: function(index) {
+            socket.emit('removeFriend',this.friends[index][0]);
+        },
 		selectDm: function(index) {
             this.currRoom[0] = this.friends[index][1];
             Vue.set(this.friends,index, this.friends[index]);

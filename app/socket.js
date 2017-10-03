@@ -1,6 +1,6 @@
 
 var queries = require("./databaseQueries");
-let i,j;
+let j;
 var users = [];
 
 module.exports = function(app,io) {
@@ -9,7 +9,7 @@ module.exports = function(app,io) {
 
     settingsPage.on('connection', function(socket) {
         queries.users.getinfo(socket.handshake.session.passport.user, function(user) {
-            for(i=0;i<user.profile_pictures.length;i++) {
+            for(var i=0;i<user.profile_pictures.length;i++) {
                 if(i==0) {
                     user.profile_pictures[i] = '/pub_files/profile_pictures/default.png';
                 } else {
@@ -50,7 +50,7 @@ module.exports = function(app,io) {
 
     io.on('connection', function (socket) {
         socket.on('disconnect', function() {
-            for(i=0;i<users.length;i++) {
+            for(var i=0;i<users.length;i++) {
                 if(users[i].id == socket.id) {
                     users.splice(i,1);
                     i = users.length;
@@ -63,14 +63,14 @@ module.exports = function(app,io) {
                 id: socket.id,
                 newRooms: []
             })
-            for(i=0;i<user.rooms.length;i++) {
+            for(var i=0;i<user.rooms.length;i++) {
                 socket.join(user.rooms[i][0]);
             }
-            for(i=0;i<user.friends.length;i++) {
+            for(var i=0;i<user.friends.length;i++) {
                 socket.join(user.friends[i].id)
             }
             var friends = []
-            for(i=0;i<user.friends.length;i++) {
+            for(var i=0;i<user.friends.length;i++) {
                 friends.push(Object.values(user.friends[i]))
             }
             socket.emit("userinfo", {
@@ -86,7 +86,7 @@ module.exports = function(app,io) {
                 socket.emit("chatMessages", msgs);
             });
             socket.on('jnR', function() { // lets user join new room
-                for(i=0;i<users.length;i++) {
+                for(var i=0;i<users.length;i++) {
                     if(users[i].user == user.username) {
                         for(j=0;j<users[i].newRooms.length;j++) {
                             socket.join(users[i].newRooms[j]);
@@ -103,7 +103,7 @@ module.exports = function(app,io) {
                 queries.sfr(user.username,friend,function(bool,err) {
                     if(bool) {
                         socket.emit("sfr",friend);
-                        for(i=0;i<users.length;i++) {
+                        for(var i=0;i<users.length;i++) {
                             if(users[i].user == friend) {
                                 socket.nsp.to(users[i].id).emit('newFR',user.username);
                             }
@@ -119,7 +119,7 @@ module.exports = function(app,io) {
                 queries.afr(user.username,friend,rndhex,function() {
                     socket.emit("fa",[friend,rndhex,0,true,friend]);
                     socket.join(rndhex);
-                    for(i=0;i<users.length;i++) {
+                    for(var i=0;i<users.length;i++) {
                         if(users[i].user == friend) {
                             users[i].newRooms.push(rndhex);
                             socket.nsp.to(users[i].id).emit('newF', [user.username,rndhex,0,true,user.displayName]);
@@ -132,6 +132,17 @@ module.exports = function(app,io) {
                 queries.cfr(user.username,friend,function() {
                     socket.emit("cpfr", friend);
                 });
+            })
+            socket.on('removeFriend', function(friend) {
+                queries.account.removeFriend(user.username,friend,function() {
+                    socket.emit('friendRemoved',friend);
+                    for(var i=0;i<users.length;i++) {
+                        if(users[i].user == friend) {
+                            socket.nsp.to(users[i].id).emit('friendRemoved', user.username);
+                            i = users.length;
+                        }
+                    }
+                })
             })
             socket.on("message",function(room,sender,message) {
                 queries.newMessage(sender,room,message,Date.now(),function(bool) {

@@ -74,7 +74,14 @@ socket.on("chatMessages", function(data) { //builds chat
 socket.on("alert", function(data) {
     alertMessage(data);
 })
-
+socket.on('friendRemoved',function(friend) {
+    for(i=0;i<chatList.friends.length;i++) {
+        if(chatList.friends[i][0] == friend) {
+            chatList.friends.splice(i,1);
+            i = chatList.friends.length;
+        }
+    }
+})
 function message(room, message) {
     socket.emit("message", room, username, message);
 }
