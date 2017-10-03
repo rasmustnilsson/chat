@@ -1,4 +1,4 @@
-var socket = io.connect(window.location.href.split("/")[2]);
+var socket = io.connect('/');
 let i, username,j,list;
 
 socket.on("incoming_friend_requests", function(data) {
@@ -29,6 +29,7 @@ socket.on('newF', function(user) { // when another user accepts your friend requ
     socket.emit('jnR'); // joins new rooms
 })
 socket.on("messageFromServer", function(room, sender, message) {
+    console.log(room,sender,message)
     if(room == chatList.currRoom[0]) {
         if(sender == username) {
             chatMessages.addMessage([message,'user', sender]);
@@ -57,16 +58,15 @@ socket.on("fr_noUser", function(user) {
     alert("username does not exist");
 })
 socket.on("userinfo", function(data) { // initial user info
+    chatList.friends = [];
     username = data.username;
-    //chatList.friends = [];
-    for (i = 0; i < data.friends.length; i++) {
-        //chatList.friends.push([data.friends[i].name,data.friends[i].id,data.friends[i].anm,data.friends[i].nm]);
-        //console.log([data.friends[i].name,data.friends[i].id,data.friends[i].anm,data.friends[i].nm])
-    }
     friendRequests.ifr = data.ifr;
     friendRequests.sfr = data.sfr;
     chatList.rooms = data.rooms;
-    chatList.friends = data.friends;
+    for(i=0;i<data.friends.length;i++) {
+        data.friends[i].push(false);
+        chatList.friends.push(data.friends[i]);
+    }
 })
 socket.on("chatMessages", function(data) { //builds chat
         buildChat(data);

@@ -9,13 +9,16 @@ module.exports = {
         getinfo: function(id,callback) { // returns user info
             MongoClient.connect(urlUsers, function(err,db) {
                 db.collection("users").findOne(ObjectId(id), function(err,result) {
+                    if(result.friends.length==0) {
+                        return callback(result);
+                    }
                     for(var i=0;i<result.friends.length;i++) {
                         (function() {
                             var d = i;
                             db.collection('users').findOne({username:result.friends[d].name},function(err,friendResult) {
                                 result.friends[d].displayName = friendResult.displayName;
                                 if(d == result.friends.length - 1) {
-                                    callback(result);
+                                    return callback(result);
                                 }
                             })
                         })();
@@ -32,7 +35,7 @@ module.exports = {
                         if(err) throw err;
                         var user = result;
                         for(i=0;i<user.friends.length;i++) {
-                            db.collection('users').update({username:user.friends[i]}, {$pull: {friends: username}});
+                            db.collection('users').update({username:user.friends[i].name}, {$pull: {friends: username}});
                         }
                         for(j=0;j<user.ifr.length;j++) {
                             db.collection('users').update({username:user.ifr[j]}, {$pull: {sfr: username}});
@@ -101,7 +104,9 @@ module.exports = {
         },
         changeDisplayName: function(username,newName,callback) {
             MongoClient.connect(urlUsers, function(err,db) {
+                console.log(err)
                 db.collection('users').update({username:username},{$set:{displayName:newName}}, function(err) {
+                    console.log(true)
                     if(err) throw err;
                     callback();
                 })
@@ -118,8 +123,7 @@ module.exports = {
     newMessage: function(sender,room,message,time,callback) { // inserts a new message
         var o = {sender:sender,room:room,message:message,time:time};
         MongoClient.connect(urlMessages, function(err, db) {
-            db.collection("messages").insertOne(o, function(err, res) {
-                db.close();
+            db.collection("messages").insertOne(o, function(err) {
                 if (err) {
                     throw err;
                     return callback(false);
@@ -140,6 +144,7 @@ module.exports = {
     sfr: function(user,friend,callback) { //sends friend requests
         MongoClient.connect(urlUsers, function(err,db) {
             let j,i;
+
             db.collection("users").findOne({username: friend}, function(err,result) {
                 if(err) throw err;
                 if(!result) {
@@ -147,12 +152,13 @@ module.exports = {
                 }
                 var fre = false // friend request exists
                 for(i = 0; i < result.friends.length; i++) {
-                    if(result.friends[i] == friend) {
+                    if(result.friends[i].name == user) {
                         return callback(false, "already friends"); // if friend exists
+                        console.log(true)
                     }
                 }
                 for(j = 0;j<result.ifr.length;j++) {
-                    if(result.ifr[j] == friend) {
+                    if(result.ifr[j].name == user) {
                         return callback(false, "friend request already sent"); //if request already sent
                     }
                 }

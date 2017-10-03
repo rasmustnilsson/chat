@@ -4,9 +4,9 @@ html
     body
         header.header
             h1 Settings
-            h3 
-                span {{displayName}} 
-                span ({{username}})
+            h3(v-cloak)
+                span {{ displayName }} 
+                span ({{ username }})
             h4
                 a(href='/') go back
             h4

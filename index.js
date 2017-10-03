@@ -9,7 +9,6 @@ var passport = require('passport');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var server = app.listen(80);
-
 var sharedsession = require("express-socket.io-session");
 var MongoStore = require('connect-mongo')(session);
 

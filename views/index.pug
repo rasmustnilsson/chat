@@ -13,14 +13,21 @@ html
             div#chatList
                 h3 Friends
                 ul
-                    li(v-for="(friend, index) in friends" v-on:click='selectDm(index)')
-                        span {{friend[4]}}
-                        span(v-if='!friend[3]') {{friend[2]}}
+                    li(v-for="(friend, index) in friends" v-cloak)
+                        div.item-content(v-bind:class="{ active: currRoom[0] == friend[1]}")
+                            span(v-on:click='selectDm(index)') {{ friend[4] }}
+                            span
+                                span(v-show='!friend[3]') {{ friend[2] }}
+                                span.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)') keyboard_arrow_up
+                        div.friend-menu(v-bind:class="[friend[5] ? 'dropdown' : dropup(index)]")
+                            p {{ friend[0] }}
+                            button() remove
                 h3 Rooms
                 ul
-                    li(v-for="(room, index) in rooms" v-on:click='selectChat(index)')
+                    li.item-content(v-for="(room, index) in rooms" v-on:click='selectChat(index)' v-bind:class="{ active: currRoom[0] == room[0]}")
                         span {{room[0]}}
-                        span(v-if='!room[2]') {{room[1]}}
+                        span
+                            span(v-show='!room[2]') {{room[1]}}
             form(id="addFriendForm" onsubmit="return false" v-on:submit="sendFriendRequest")
                 input(type="text" v-model="friend" placeholder="username")
                 input(type="submit" value="add")
@@ -37,7 +44,7 @@ html
                         button(v-on:click="cfr(index)") cancel
         section.chatWindow
             div#chatMessages.chatMessages
-                    div(v-for="(message, index) in messages" :class='message[1]' class="message")
+                    div(v-for="(message, index) in messages" :class='message[1]' class="message" v-cloak)
                         img(v-bind:src="imgSrc(message[2])" alt="Profile Picture" :class='message[1]')
                         span {{message[0]}}
             form(id="messageForm" onsubmit="return false" v-on:submit="sendMessage" class="chat_input_form")

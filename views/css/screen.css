@@ -4,8 +4,10 @@
 }
 :root {
     --default-padding: 40px;
-    --default-pp-size: 200px
+    --default-pp-size: 200px;
+    --default-friend-menu-height: 70px;
 }
+
 html,body {
     height: 100%;
 }
@@ -15,7 +17,7 @@ body {
 }
 .logged_in {
     display: grid;
-    grid-template-columns: 2fr 5fr;
+    grid-template-columns: 1fr 4fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:    "header header"
                             "rooms chat";
@@ -23,6 +25,21 @@ body {
 ul {
     padding: 0;
     list-style: none;
+    margin: 0 0 16px 0;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.item-content span:first-child {
+    flex-grow: 1;
+    line-height: 28px;
+    padding: 4px;
+}
+.user-settings-icon {
+    margin-right: 4px;
 }
 .chatWindow {
     grid-area: chat;
@@ -89,7 +106,37 @@ div.user {
     display: none;
 }
 .active {
-    text-decoration: underline;
+    background-color: green;
+    color: white;
+    font-weight: bold;
+}
+.friend-menu {
+    height: 0;
+    padding: 0 4px;
+    overflow: hidden;
+}
+.friend-menu p {
+    margin-top: 4px
+}
+.dropup {
+    animation: slideUp 200ms forwards ease-out;
+
+}
+.dropdown {
+    animation: slideDown 200ms forwards ease-out;
+}
+@keyframes slideDown {
+    to {
+        height: var(--default-friend-menu-height);
+    }
+}
+@keyframes slideUp {
+    from {
+        height: var(--default-friend-menu-height);
+    }
+    to {
+        height: 0;
+    }
 }
 .settings img {
     height: var(--default-pp-size);
@@ -123,3 +170,26 @@ article {
 .selectedpp {
     border: 4px solid green;
 }
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+}
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/MaterialIcons-Regular.ttf'), url();
+
+}
+
+[v-cloak] { display:none; }

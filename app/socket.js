@@ -67,12 +67,11 @@ module.exports = function(app,io) {
                 socket.join(user.rooms[i][0]);
             }
             for(i=0;i<user.friends.length;i++) {
-                socket.join(user.friends[i][1])
+                socket.join(user.friends[i].id)
             }
             var friends = []
             for(i=0;i<user.friends.length;i++) {
                 friends.push(Object.values(user.friends[i]))
-                //console.log(friends)
             }
             socket.emit("userinfo", {
                 username:user.username,
@@ -86,22 +85,21 @@ module.exports = function(app,io) {
             queries.get("default", function(msgs) {
                 socket.emit("chatMessages", msgs);
             });
-            socket.on('jnR', function() {
+            socket.on('jnR', function() { // lets user join new room
                 for(i=0;i<users.length;i++) {
                     if(users[i].user == user.username) {
                         for(j=0;j<users[i].newRooms.length;j++) {
                             socket.join(users[i].newRooms[j]);
-                            //i = users[i].length;
                         }
                     }
                 }
             })
-            socket.on("getMessages", function(room) {
+            socket.on("getMessages", function(room) { // sends messages from specific chat
                 queries.get(room, function(msgs) {
                     socket.emit("chatMessages", msgs);
                 });
             })
-            socket.on("addFriend", function(friend) {
+            socket.on("addFriend", function(friend) { // sends friend request
                 queries.sfr(user.username,friend,function(bool,err) {
                     if(bool) {
                         socket.emit("sfr",friend);
@@ -119,18 +117,18 @@ module.exports = function(app,io) {
             socket.on("confirmFriend", function(friend) { // confirms friend request
                 var rndhex = Math.floor(Math.random()*268435455).toString(16);
                 queries.afr(user.username,friend,rndhex,function() {
-                    socket.emit("fa",[friend,rndhex,0,true]);
+                    socket.emit("fa",[friend,rndhex,0,true,friend]);
                     socket.join(rndhex);
                     for(i=0;i<users.length;i++) {
                         if(users[i].user == friend) {
                             users[i].newRooms.push(rndhex);
-                            socket.nsp.to(users[i].id).emit('newF', [user.username,rndhex,0,true]);
+                            socket.nsp.to(users[i].id).emit('newF', [user.username,rndhex,0,true,user.displayName]);
                             i = users.length;
                         }
                     }
                 })
             })
-            socket.on("cfr", function(friend) { //cancels friend request
+            socket.on("cfr", function(friend) { // cancels friend request
                 queries.cfr(user.username,friend,function() {
                     socket.emit("cpfr", friend);
                 });
