@@ -1,11 +1,14 @@
 var express = require('express');
 var session = require('express-session');
+var expressValidator = require('express-validator');
+
 var fileUpload = require('express-fileupload');
 var pug = require('pug');
 var app = express();
 var path = require('path');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var server = app.listen(80);
@@ -27,12 +30,14 @@ var session = session({ // session settings
 
 var io = require('socket.io')(server); // opens socket.io server
 
-require('./config/passport')(passport); // loads passport
+require('./config/passport')(passport,LocalStrategy); // loads passport
 
 app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'views')));
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(expressValidator());
 app.use(fileUpload());
 app.use(session);
 

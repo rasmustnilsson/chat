@@ -11,9 +11,17 @@ module.exports = function(app,passport,io) {
     }
     app.get('/', function(req, res) {
         if (req.isAuthenticated()) {
-            res.render('index', pug.get(req.user,'index'));
+            res.render('index', pug.get({user:req.user,page:'index'}));
+            if(req.session.errors) {
+                req.session.errors = [];
+                req.session.save();
+            }
         } else {
-            res.render('notloggedin', pug.get());
+            if(req.session.errors) {
+                res.render('login', pug.get({errors:req.session.errors}));
+            } else {
+                res.render('login', pug.get({errors:[]}));
+            }
         }
     })
     app.get('/error', function(req, res,) {
@@ -24,7 +32,24 @@ module.exports = function(app,passport,io) {
         successRedirect: '/',
         failureRedirect: '/',
     }))
-
+    app.post('/signup', function(req,res,next) {
+        req.checkBody('password', 1).notEmpty(); // if password field is empty
+        req.checkBody('confirming_password', 1).notEmpty(); // is conforming password field is empty
+        req.checkBody('password', 2).isLength({min: 2}); // if the password is to short
+        req.checkBody('username', 2).isLength({min: 4}); // if the password is to short
+        req.checkBody('password', 3).equals(req.body.confirming_password); // if the password and confirming password dont match
+        var errors = req.validationErrors();
+        if(errors) {
+            req.session.errors = [];
+            req.session.errors.push(1);
+                req.session.save(function(err) {
+                    if(err) throw err;
+                    res.redirect('/');
+                });
+        } else {
+            next();
+        }
+    })
     app.post('/signup', passport.authenticate('local-signup', {
         successRedirect: '/',
         failureRedirect: '/',
@@ -43,7 +68,7 @@ module.exports = function(app,passport,io) {
         })
     })
     app.get('/settings',loggedIn, function(req,res) {
-        res.render('settings', pug.get(req.user,'settings'));
+        res.render('settings', pug.get({user:req.user,page:'settings'}));
     })
     app.post('/upload',loggedIn,function(req, res) {
         let uploadedFile = req.files.profile_picture;

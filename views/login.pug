@@ -1,0 +1,39 @@
+doctype html
+html
+    include includes/head.pug
+    body
+        h1= header
+        h2 login
+        form(method='post' action='login')
+            p Username:
+            div.input-boxes
+                input(type='text' name='username' required autofocus)
+            p Password: 
+            div.input-boxes
+                input(type='password' name='password' required)
+            input(type='submit' value='login')
+        h2 signup
+        if createAccountError
+            ul
+                li Username must be at least 4 characters long
+                li Username must be available
+                li Password must be at least 2 characters long
+                li Passwords must match
+        form#signupForm(method='post' action='signup')
+            p Username:
+            div.input-boxes
+                input(type='text' name='username' required v-model='username')
+                i.material-icons(v-if='username.length > 0 && username.length < 4' title='Your userame must be 4 characters or longer') error
+                i.material-icons(v-else-if='username.length >= 4') check
+            p Password:
+            div.input-boxes
+                input(type='password' name='password' required v-model='password')
+                i.material-icons(v-if='password.length > 0 && password.length < 2' title='Your password must be 2 characters or longer') error
+                i.material-icons(v-else-if='password.length >= 2') check
+            p Confirm Password:
+            div.input-boxes
+                input(type='password' name='confirming_password' required v-model='confPassword')
+                i.material-icons(v-if='password != confPassword && confPassword.length != 0' title='Your password must match') error
+                i.material-icons(v-else-if='password == confPassword && confPassword.length != 0') check
+            input(type='submit' value='signup')
+    include includes/bottom.pug

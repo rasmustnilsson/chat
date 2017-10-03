@@ -1,7 +1,7 @@
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('../app/users');
 
-module.exports = function(passport) {
+module.exports = function(passport,LocalStrategy) {
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
         done(null, user.id);
@@ -44,13 +44,11 @@ module.exports = function(passport) {
     },
     function(req, username, password, done) {
         User.findOne({'username':  username}, function(err, user) {
-            // if there are any errors, return the error before anything else
             if (err) return done(err);
             // if no user is found, return the message
-            if (!user) return done(null, false); // req.flash is the way to set flashdata using connect-flash
+            if (!user) return done(null, false);
             // if the user is found but the password is wrong
-            if (!user.validPassword(password)) return done(null, false); // create the loginMessage and save it to session as flashdata
-            // all is well, return successful user
+            if (!user.validPassword(password)) return done(null, false);
             return done(null, user);
         });
     }));

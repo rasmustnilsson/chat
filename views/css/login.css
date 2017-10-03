@@ -1,0 +1,22 @@
+html body {
+    margin: 0 20px;
+}
+body ul {
+    list-style-type: disc;
+    padding-left: 40px;
+}
+.signup-boxes {
+    display: flex;
+}
+input {
+    font-size: 18px;
+    padding: 2px 0;
+    margin: 8px 0;
+}
+form p {
+    margin: 0;
+}
+input[type="submit"] {
+    font-size: 16px;
+    padding: 4px;
+}
