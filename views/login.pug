@@ -4,7 +4,11 @@ html
     body
         h1= header
         h2 login
-        form(method='post' action='login')
+        - var loginRoute = 'login'
+        if joinRoomNotSignedIn
+            - var loginRoute = '/login/joinRoom/' + room
+            h3 You need to login to join a room
+        form(method='post' action=loginRoute)
             p Username:
             div.input-boxes
                 input(type='text' name='username' required autofocus)

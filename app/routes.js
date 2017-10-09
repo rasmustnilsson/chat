@@ -6,7 +6,11 @@ module.exports = function(app,passport,io) {
         if(req.isAuthenticated()) {
             next();
         } else {
-            res.redirect('/');
+            if(req.route.path.split('/')[1] == 'joinRoom') {
+                res.render('login', pug.get({errors:[2],room:req.params.room}));
+            } else {
+                res.redirect('/');
+            }
         }
     }
     app.get('/', function(req, res) {
@@ -28,15 +32,23 @@ module.exports = function(app,passport,io) {
         res.redirect('/');
     })
 
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect: '/',
-        failureRedirect: '/',
-    }))
+    app.post(['/login','/login/joinRoom/:room'],
+        passport.authenticate('local-login', {
+            failureRedirect: '/'
+        }),
+        function(req,res) {
+            if(req.params.room) {
+                res.redirect('/joinRoom/' + req.params.room);
+            } else {
+                res.redirect('/');
+            }
+        }
+    )
     app.post('/signup', function(req,res,next) {
         req.checkBody('password', 1).notEmpty(); // if password field is empty
         req.checkBody('confirming_password', 1).notEmpty(); // is conforming password field is empty
         req.checkBody('password', 2).isLength({min: 2}); // if the password is to short
-        req.checkBody('username', 2).isLength({min: 4}); // if the password is to short
+        req.checkBody('username', 2).isLength({min: 4}); // if the username is to short
         req.checkBody('password', 3).equals(req.body.confirming_password); // if the password and confirming password dont match
         var errors = req.validationErrors();
         if(errors) {
@@ -70,16 +82,24 @@ module.exports = function(app,passport,io) {
     app.get('/settings',loggedIn, function(req,res) {
         res.render('settings', pug.get({user:req.user,page:'settings'}));
     })
-    app.post('/upload',loggedIn,function(req, res) {
+    app.post('/upload',loggedIn,function(req,res) {
         let uploadedFile = req.files.profile_picture;
-        var rndhex = Math.floor(Math.random()*268435455).toString(16);
+        var rndhex = Math.floor(Math.random()*268435455).toString(16); // generates a random hex id
         uploadedFile.name = rndhex + '_' + uploadedFile.name;
         uploadedFile.mv('views/pub_files/' + req.user.username + '/profile_pictures/' + uploadedFile.name, function(err) {
             if(err) return res.status(500).send(err);
             queries.account.uploadProfilePic(uploadedFile,req.user.username, function() {
-                if(err) throw err;
                 res.send(true);
             });
         })
     });
+    app.get('/joinRoom/:room',loggedIn, function(req,res) {
+        queries.rooms.joinRoom(req.user.username,req.params.room,function(couldJoin,msg) {
+            if(couldJoin) {
+                res.redirect('/');
+            } else {
+                res.send(msg);
+            }
+        })
+    })
 }

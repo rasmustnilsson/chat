@@ -6,6 +6,8 @@
     --default-padding: 40px;
     --default-pp-size: 200px;
     --default-friend-menu-height: 70px;
+    --room-dropdown-menu-height: 63px;
+    --friend-dropdown-menu-height: 55px;
 }
 
 html,body {
@@ -17,7 +19,7 @@ body {
 }
 .logged_in {
     display: grid;
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 2fr 4fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:    "header header"
                             "rooms chat";
@@ -27,18 +29,38 @@ ul {
     list-style: none;
     margin: 0 0 16px 0;
 }
-
+#chatList li {
+    overflow: hidden;
+}
 .item-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    z-index: 2;
+    position: relative;
+    background-color: white;
 }
 .item-content span:first-child {
     flex-grow: 1;
     line-height: 28px;
     padding: 4px;
 }
-.user-settings-icon {
+.room-menu {
+    position: relative;
+    z-index: 1;
+    max-height: var(--room-dropdown-menu-height);
+}
+.dropdown-menu {
+    padding: 0 4px;
+}
+.dropdown-menu p {
+    margin: 0;
+    padding: 8px 0;
+}
+.room-menu button {
+    margin: 4px 0;
+}
+.chatList i {
     margin-right: 4px;
 }
 .chatWindow {
@@ -62,7 +84,7 @@ aside {
     padding-top: 0;
 }
 aside h3:first-of-type {
-    margin-top: 0;
+    margin: 0;
 }
 .chat_input_form {
     display: grid;
@@ -111,31 +133,21 @@ div.user {
     font-weight: bold;
 }
 .friend-menu {
-    height: 0;
-    padding: 0 4px;
-    overflow: hidden;
+    max-height: var(--friend-dropdown-menu-height);
 }
-.friend-menu p {
-    margin-top: 4px
+.friend-menu-toggle-enter-active {
+    animation: friendToggle 200ms forwards ease-out;
 }
-.dropup {
-    animation: slideUp 200ms forwards ease-out;
-
+.friend-menu-toggle-leave-active {
+    animation: friendToggle 200ms reverse forwards ease-in;
 }
-.dropdown {
-    animation: slideDown 200ms forwards ease-out;
-}
-@keyframes slideDown {
-    to {
-        height: var(--default-friend-menu-height);
-    }
-}
-@keyframes slideUp {
-    from {
-        height: var(--default-friend-menu-height);
-    }
-    to {
-        height: 0;
+@keyframes friendToggle {
+    0% {
+        max-height: 0px;
+        transform: translateY(calc(-1*var(--friend-dropdown-menu-height)));
+    } 100% {
+        max-height: var(--friend-dropdown-menu-height);
+        transform: translateY(0);
     }
 }
 .settings img {
@@ -157,15 +169,12 @@ article {
     position: relative;
     cursor: pointer;
 }
-.pp_options {
-    height: var(--default-pp-size);
-    width: var(--default-pp-size);
-    position: absolute;
-    top: 0;
-}
-.pp_options .icon {
+html body .icon {
     height: 24px;
     width: 24px;
+    position: absolute;
+    top: 0px;
+    left: 16px;
 }
 .selectedpp {
     border: 4px solid green;
@@ -183,13 +192,58 @@ article {
     word-wrap: normal;
     white-space: nowrap;
     direction: ltr;
+    user-select: none;
 }
 @font-face {
     font-family: 'Material Icons';
     font-style: normal;
     font-weight: 400;
-    src: url('../fonts/MaterialIcons-Regular.ttf'), url();
+    src: url('../fonts/MaterialIcons-Regular.ttf');
 
 }
-
-[v-cloak] { display:none; }
+[v-cloak]{display: none;opacity: 0;}
+.title-box {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 1em;
+}
+.title-box .add-friend-form {
+    position: absolute;
+    left: 100%;
+    display: flex;
+    padding-left: 8px;
+}
+.roomMenu {
+    position: absolute;
+    left: 100%;
+    padding-left: 4px;
+}
+.roomMenu form {
+    display: flex;
+}
+.roomMenu h4 {
+    margin: 12px 0;
+}
+.roomMenu h4:first-of-type {
+    margin-top: 4px;
+}
+.title-box input[type='text'] {
+    padding-left: 2px;
+}
+.room-menu-toggle-enter-active {
+  animation: toggle 200ms forwards ease-out;
+}
+.room-menu-toggle-leave-active {
+  animation: toggle 200ms reverse forwards ease-in;
+}
+@keyframes toggle {
+  0% {
+      max-height: 0px;
+      transform: translateY(calc(-1*var(--room-dropdown-menu-height)));
+  }
+  100% {
+      max-height: var(--room-dropdown-menu-height);
+      transform: translateY(0);
+  }
+}

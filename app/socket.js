@@ -4,11 +4,9 @@ let j;
 var users = [];
 
 module.exports = function(app,io) {
-
     var settingsPage = io.of('/settings');
-
     settingsPage.on('connection', function(socket) {
-        queries.users.getinfo(socket.handshake.session.passport.user, function(user) {
+        queries.account.getinfo(socket.handshake.session.passport.user, function(user) {
             for(var i=0;i<user.profile_pictures.length;i++) {
                 if(i==0) {
                     user.profile_pictures[i] = '/pub_files/profile_pictures/default.png';
@@ -47,7 +45,6 @@ module.exports = function(app,io) {
             })
         })
     })
-
     io.on('connection', function (socket) {
         socket.on('disconnect', function() {
             for(var i=0;i<users.length;i++) {
@@ -57,7 +54,7 @@ module.exports = function(app,io) {
                 }
             }
         })
-        queries.users.getinfo(socket.handshake.session.passport.user, function(user) {
+        queries.account.getinfo(socket.handshake.session.passport.user, function(user) {
             users.push({
                 user: user.username,
                 id: socket.id,
@@ -67,11 +64,12 @@ module.exports = function(app,io) {
                 socket.join(user.rooms[i][0]);
             }
             for(var i=0;i<user.friends.length;i++) {
-                socket.join(user.friends[i].id)
+                socket.join(user.friends[i].id);
             }
             var friends = []
             for(var i=0;i<user.friends.length;i++) {
-                friends.push(Object.values(user.friends[i]))
+                friends.push(Object.values(user.friends[i]));
+                friends[i][5] = false;
             }
             socket.emit("userinfo", {
                 username:user.username,
@@ -98,6 +96,22 @@ module.exports = function(app,io) {
                 queries.get(room, function(msgs) {
                     socket.emit("chatMessages", msgs);
                 });
+            })
+            socket.on('joinRoom', function(room) {
+                queries.rooms.joinRoom(user.username,room,function(roomExists) {
+                    if(roomExists) {
+                        socket.emit('joinRoom', room);
+                        socket.join(room);
+
+                    } else {
+                        socket.emit('alert', msg);
+                    }
+                });
+            })
+            socket.on('leaveRoom', function(room) {
+                queries.rooms.leaveRoom(user.username,room,function() {
+                    socket.emit('leaveRoom',room);
+                })
             })
             socket.on("addFriend", function(friend) { // sends friend request
                 queries.sfr(user.username,friend,function(bool,err) {

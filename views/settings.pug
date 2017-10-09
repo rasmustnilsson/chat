@@ -22,9 +22,8 @@ html
             h3 Change profile picture:
             div.profile_picture_container
                 span.pp(v-for='(image,index) in profile_pictures')
-                    img(:src='image' alt='profile picture')
-                    div.pp_options(v-bind:class='{selectedpp:profile_picture_index == index}' v-on:click='changeProfilePicture(index)')
-                        img(v-if='index != 0' src='pub_files/icons/ic_delete_black_24dp_1x.png' class='icon' v-on:click='deleteProfilePicture(image)')
+                    img(:src='image' alt='profile picture' v-bind:class='{selectedpp:profile_picture_index == index}' v-on:click='changeProfilePicture(index)')
+                    img(v-if='index != 0' src='pub_files/icons/ic_delete_black_24dp_1x.png' class='icon' v-on:click='deleteProfilePicture(image)')
             h3 Upload new picture
             div(v-if='!image')
                 input(type='file' @change='onFileChange')

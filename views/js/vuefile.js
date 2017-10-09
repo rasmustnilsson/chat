@@ -5,9 +5,32 @@ var chatList = new Vue({
         friends: [],
         currRoom: ["default",0,true],
         highlightedChat: 'default',
-        openedFriendMenu: [],
+        addUserToggled: false,
+        roomMenuToggled: false,
+        joinRoomInput: '',
+        createRoomInput: '',
+        friend: '',
     },
     methods: {
+        sendFriendRequest: function() {
+            if(this.friend != "") {
+                socket.emit("addFriend", this.friend);
+                this.friend = "";
+            }
+        },
+        joinRoom: function() {
+            if(this.joinRoomInput) {
+                socket.emit('joinRoom', this.joinRoomInput);
+            }
+        },
+        createRoom: function() {
+            if(this.createRoomInput) {
+                socket.emit('createRoom', this.createRoomInput);
+            }
+        },
+        leaveRoom: function(room) {
+            socket.emit('leaveRoom',room);
+        },
         selectChat: function(index) {
             this.currRoom = this.rooms[index];
             Vue.set(this.rooms, index, [this.rooms[index][0],0,true]);
@@ -23,32 +46,42 @@ var chatList = new Vue({
             this.friends[index][3] = true;
             socket.emit("getMessages",this.currRoom[0]);
 		},
-        dropup: function(index) {
-            if(this.openedFriendMenu[index]) {
-                return 'dropup';
-            } else {
-                return '';
-            }
-        },
-        toggleMenu: function(index, boolean) {
+        toggleMenu: function(index, boolean) { // toggles the room and menus
             if(boolean) {
-                this.openedFriendMenu[index] = true;
                 Vue.set(this.friends,index, this.friends[index]);
                 this.friends[index][5] = !this.friends[index][5];
             } else {
-
-            }
-        },
-        addMessageNotification: function(room) {
-            for(i=0;i<this.friends.length;i++) {
-                if(this.friends[i][1] == room) {
-                    console.log(this.friends[i][0])
-                    Vue.set(this.friends, i, [this.friends[i][0],this.friends[i][1],this.friends[i][2]+1,false,this.friends[i][4],this.friends[index][5]]);
+                Vue.set(this.rooms,index,this.rooms[index]);
+                if(!this.rooms[index][3]) {
+                    this.rooms[index][3] = true;
+                } else {
+                    this.rooms[index][3] = !this.rooms[index][3];
                 }
             }
-            for(j=0;j<this.rooms.length;j++) {
-                if(this.rooms[j][0] == room) {
-                    Vue.set(this.rooms, j, [this.rooms[j][0],this.rooms[j][1] +1,false]);
+        },
+        getInviteLink: function(index) {}, // WIP, will copy the invite link to clipboard
+        showInviteLink: function(index) {
+            alert('localhost/joinRoom/' + this.rooms[index][0]);
+        },
+        addMessageNotification: function(room) {
+            if(this.currRoom[0] != room) {
+                for(i=0;i<this.friends.length;i++) {
+                    if(this.friends[i][1] == room) {
+                        Vue.set(this.friends, i, this.friends[i]);
+                        this.friends[i][2] += 1;
+                        this.friends[i][3] = false;
+                        i = this.friends.length;
+                        return true;
+                    }
+                }
+                for(j=0;j<this.rooms.length;j++) {
+                    if(this.rooms[j][0] == room) {
+                        Vue.set(this.rooms, j, this.rooms[j]);
+                        this.rooms[j][1] += 1;
+                        this.rooms[j][2] = false;
+                        j = this.rooms.length;
+                        return true;
+                    }
                 }
             }
         }
@@ -108,20 +141,6 @@ var messageForm = new Vue({
             if(this.message != "") {
                 message(chatList.currRoom[0],this.message);
                 this.message = "";
-            }
-        }
-    }
-})
-var addFriend = new Vue({
-    el: "#addFriendForm",
-    data: {
-        friend: ""
-    },
-    methods: {
-        sendFriendRequest: function() {
-            if(this.friend != "") {
-                socket.emit("addFriend", this.friend);
-                this.friend = "";
             }
         }
     }

@@ -7,8 +7,10 @@ module.exports = {
             header:"Node js socket io chat!",
             page: 'loggedOut',
             createAccountError: false,
+            joinRoomNotSignedIn: false,
+            room: o.room,
         }
-        if(o.user || o.page) {
+        if(o.page) {
             var page = o.page;
             var user = o.user;
             j.username = user.username;
@@ -27,10 +29,10 @@ module.exports = {
             j.css.push('login.css');
             j.vueScript = 'login.js';
             for(var i = 0;i<o.errors.length;i++) {
-                j.createAccountError = true;
                 if(o.errors[i] == 1) {
+                    j.createAccountError = true;
                 } else if(o.errors[i] == 2) {
-
+                    j.joinRoomNotSignedIn = true;
                 } else if(o.errors[i] == 3) {
                 }
             }
