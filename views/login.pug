@@ -8,6 +8,8 @@ html
         if joinRoomNotSignedIn
             - var loginRoute = '/login/joinRoom/' + room
             h3 You need to login to join a room
+        if wrongPassOrUsername
+            h3 Wrong password or username
         form(method='post' action=loginRoute)
             p Username:
             div.input-boxes

@@ -45,10 +45,16 @@ module.exports = function(passport,LocalStrategy) {
     function(req, username, password, done) {
         User.findOne({'username':  username}, function(err, user) {
             if (err) return done(err);
-            // if no user is found, return the message
-            if (!user) return done(null, false);
-            // if the user is found but the password is wrong
-            if (!user.validPassword(password)) return done(null, false);
+            if (!user) { // if no user is found, return the message
+                req.session.errors.loginFailed = true;
+                req.session.save();
+                return done(null, false);
+            }
+            if (!user.validPassword(password)) { // if the user is found but the password is wrong
+                req.session.errors.loginFailed = true;
+                req.session.save();
+                return done(null, false);
+            };
             return done(null, user);
         });
     }));

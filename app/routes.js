@@ -3,61 +3,53 @@ var queries = require("./databaseQueries");
 
 module.exports = function(app,passport,io) {
     function loggedIn(req,res,next) {
-        if(req.isAuthenticated()) {
-            next();
-        } else {
+        if(!req.isAuthenticated()) {
             if(req.route.path.split('/')[1] == 'joinRoom') {
-                res.render('login', pug.get({errors:[2],room:req.params.room}));
+                req.session.errors.joinRoomFailed = true;
+                req.session.save();
+                res.render('login', pug.get({errors:req.session.errors,room:req.params.room}));
             } else {
                 res.redirect('/');
             }
+        } else {
+            next();
         }
     }
     app.get('/', function(req, res) {
         if (req.isAuthenticated()) {
             res.render('index', pug.get({user:req.user,page:'index'}));
             if(req.session.errors) {
-                req.session.errors = [];
+                req.session.errors = {};
                 req.session.save();
             }
         } else {
-            if(req.session.errors) {
-                res.render('login', pug.get({errors:req.session.errors}));
-            } else {
-                res.render('login', pug.get({errors:[]}));
-            }
+            res.render('login', pug.get({errors:req.session.errors}));
         }
     })
-    app.get('/error', function(req, res,) {
-        res.redirect('/');
+    app.post('/login/joinRoom/:room', function(req,res,next) {
+        passport.authenticate('local-login', function(err,user) {
+            if(err) return res.redirect('/');
+            if(!user) { return res.redirect('/joinRoom/' + req.params.room) }
+            req.login(user,function(err) {
+                if(err) { return res.redirect('/') };
+                return res.redirect('/joinRoom/' + req.params.room);
+            })
+        })(req,res,next);
     })
-
-    app.post(['/login','/login/joinRoom/:room'],
-        passport.authenticate('local-login', {
-            failureRedirect: '/'
-        }),
-        function(req,res) {
-            if(req.params.room) {
-                res.redirect('/joinRoom/' + req.params.room);
-            } else {
-                res.redirect('/');
-            }
-        }
-    )
+    app.post('/login', passport.authenticate('local-login', {
+        successRedirect: '/',
+        failureRedirect: '/',
+    }))
     app.post('/signup', function(req,res,next) {
         req.checkBody('password', 1).notEmpty(); // if password field is empty
-        req.checkBody('confirming_password', 1).notEmpty(); // is conforming password field is empty
         req.checkBody('password', 2).isLength({min: 2}); // if the password is to short
         req.checkBody('username', 2).isLength({min: 4}); // if the username is to short
         req.checkBody('password', 3).equals(req.body.confirming_password); // if the password and confirming password dont match
-        var errors = req.validationErrors();
-        if(errors) {
-            req.session.errors = [];
-            req.session.errors.push(1);
-                req.session.save(function(err) {
-                    if(err) throw err;
-                    res.redirect('/');
-                });
+        if(req.validationErrors()) {
+            req.session.errors.createAccountFailed = true;
+            req.session.save(function() {
+                res.redirect('/')
+            });
         } else {
             next();
         }
@@ -67,10 +59,11 @@ module.exports = function(app,passport,io) {
         failureRedirect: '/',
     }))
     app.post('/removeAccount', function(req,res) {
-        queries.account.removeAccount(req.user.username);
-        res.redirect('/logout');
+        queries.account.removeAccount(req.user.username, function() {
+            res.redirect('/logout');
+        });
     })
-    app.get('/logout', function(req, res) {
+    app.get('/logout', function(req,res) {
         req.logout();
         res.redirect('/');
     })

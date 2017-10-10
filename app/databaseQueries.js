@@ -47,9 +47,8 @@ module.exports = {
                     dbUsers.collection('users').update({username:user.sfr[k]}, {$pull: {ifr: username}});
                 }
                 dbUsers.collection('users').remove({username: username});
-                fs.remove('views/pub_files/' + username, function() {
-                    //callback();
-                })
+                fs.remove('views/pub_files/' + username);
+                callback();
             })
         },
         removeFriend: function(username,friend,callback) {
@@ -79,7 +78,6 @@ module.exports = {
             dbUsers.collection('users').findOne({username:username}, function(err,result) {
                 var pIndex = result.profile_pictures.indexOf(picture);
                 var ppIndex = result.profile_picture_index;
-                console.log(pIndex,ppIndex)
                 if(pIndex == -1) { // if the pictures name does not exist in the database
                     return callback(false,0,'You cant delete this picture because it does not exist!');
                 } else if(ppIndex == pIndex) { // if the picture is the current profile picture

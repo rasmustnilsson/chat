@@ -8,6 +8,7 @@ module.exports = {
             page: 'loggedOut',
             createAccountError: false,
             joinRoomNotSignedIn: false,
+            wrongPassOrUsername: false,
             room: o.room,
         }
         if(o.page) {
@@ -28,13 +29,13 @@ module.exports = {
         } else {
             j.css.push('login.css');
             j.vueScript = 'login.js';
-            for(var i = 0;i<o.errors.length;i++) {
-                if(o.errors[i] == 1) {
-                    j.createAccountError = true;
-                } else if(o.errors[i] == 2) {
-                    j.joinRoomNotSignedIn = true;
-                } else if(o.errors[i] == 3) {
-                }
+            if(o.errors.createAccountFailed) {
+                j.createAccountError = true;
+            } else if(o.errors.loginFailed) {
+                j.wrongPassOrUsername = true;
+            }
+            if(o.errors.joinRoomFailed) {
+                j.joinRoomNotSignedIn = true;
             }
         }
         return j;
