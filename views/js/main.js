@@ -64,9 +64,6 @@ socket.on("fa", function(user) {
     var a = friendRequests.ifr.indexOf(user);
     friendRequests.ifr.splice(a, 1);
 })
-socket.on("fr_noUser", function(user) {
-    alert("username does not exist");
-})
 socket.on("userinfo", function(data) { // initial user info
     chatList.friends = [];
     username = data.username;
@@ -78,8 +75,8 @@ socket.on("userinfo", function(data) { // initial user info
 socket.on("chatMessages", function(data) { //builds chat
         buildChat(data);
 })
-socket.on("alert", function(data) {
-    alertMessage(data);
+socket.on("alert", function(msg) {
+    errorMessages.addMessage(msg);
 })
 socket.on('friendRemoved',function(friend) {
     for(i=0;i<chatList.friends.length;i++) {

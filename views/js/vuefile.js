@@ -87,6 +87,23 @@ var chatList = new Vue({
         }
     }
 })
+var errorMessages = new Vue({
+    el: '#errorMsg',
+    data: {
+        messages: []
+    },
+    methods: {
+        addMessage: function(message) {
+            this.messages.push(message);
+            this.removeMessage();
+        },
+        removeMessage: function() {
+            setTimeout(function(){
+                errorMessages.messages.splice(0,1);
+            },2000);
+        },
+    }
+})
 var chatMessages = new Vue({
     el: "#chatMessages",
     data: {

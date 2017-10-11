@@ -153,8 +153,8 @@ module.exports = {
         }
     },
     cfr: function(user,friend,callback) { // cancels friend request
-        db.collection("users").update({username:user},{$pull: {sfr: friend}});
-        db.collection("users").update({username:friend},{$pull: {ifr: user}});
+        dbUsers.collection("users").update({username:user},{$pull: {sfr: friend}});
+        dbUsers.collection("users").update({username:friend},{$pull: {ifr: user}});
         return callback();
     },
     newMessage: function(sender,room,message,time,callback) { // inserts a new message
