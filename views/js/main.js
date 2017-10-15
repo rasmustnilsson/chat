@@ -80,7 +80,7 @@ socket.on("alert", function(msg) {
 })
 socket.on('friendRemoved',function(friend) {
     for(i=0;i<chatList.friends.length;i++) {
-        if(chatList.friends[i][0] == friend) {
+        if(chatList.friends[i].name == friend) {
             chatList.friends.splice(i,1);
             i = chatList.friends.length;
         }

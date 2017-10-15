@@ -37,19 +37,19 @@ var chatList = new Vue({
             socket.emit("getMessages",this.currRoom[0]);
         },
         removeFriend: function(index) {
-            socket.emit('removeFriend',this.friends[index][0]);
+            socket.emit('removeFriend',this.friends[index].name);
         },
 		selectDm: function(index) {
-            this.currRoom[0] = this.friends[index][1];
+            this.currRoom[0] = this.friends[index].id;
             Vue.set(this.friends,index, this.friends[index]);
-            this.friends[index][2] = 0;
-            this.friends[index][3] = true;
+            this.friends[index].anm = 0;
+            this.friends[index].nm = true;
             socket.emit("getMessages",this.currRoom[0]);
 		},
         toggleMenu: function(index, boolean) { // toggles the room and menus
             if(boolean) {
                 Vue.set(this.friends,index, this.friends[index]);
-                this.friends[index][5] = !this.friends[index][5];
+                this.friends[index].dropDownToggled = !this.friends[index].dropDownToggled;
             } else {
                 Vue.set(this.rooms,index,this.rooms[index]);
                 if(!this.rooms[index][3]) {
@@ -66,10 +66,10 @@ var chatList = new Vue({
         addMessageNotification: function(room) {
             if(this.currRoom[0] != room) {
                 for(i=0;i<this.friends.length;i++) {
-                    if(this.friends[i][1] == room) {
+                    if(this.friends[i].name == room) {
                         Vue.set(this.friends, i, this.friends[i]);
-                        this.friends[i][2] += 1;
-                        this.friends[i][3] = false;
+                        this.friends[i].anm += 1;
+                        this.friends[i].anm = false;
                         i = this.friends.length;
                         return true;
                     }

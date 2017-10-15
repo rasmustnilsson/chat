@@ -19,17 +19,20 @@ module.exports = {
                 if(result.friends.length==0) {
                     return callback(result);
                 }
-                for(var i=0;i<result.friends.length;i++) {
-                    (function() {
-                        var d = i;
-                        dbUsers.collection('users').findOne({username:result.friends[d].name},function(err,friendResult) {
-                            result.friends[d].displayName = friendResult.displayName;
-                            if(d == result.friends.length-1) {
-                                return callback(result);
-                            }
-                        })
-                    })();
+                var d = 0;
+                function loop() { // loops through all the users and adds the nickname to the array, doesn't work with a normal loop
+                    dbUsers.collection('users').findOne({username:result.friends[d].name},function(err,friendResult) {
+                        result.friends[d].displayName = friendResult.displayName;
+                        if(d == result.friends.length-1) {
+                            d = result.friends.length;
+                            callback(result);
+                        } else {
+                            d++;
+                            loop();
+                        }
+                    })
                 }
+                loop();
             })
         },
         removeAccount: function(username,callback) {
@@ -214,7 +217,7 @@ module.exports = {
             if(err) throw err;
             dbUsers.collection("users").update({username: user},{$push: {friends: {name:friend,id:rndhex,anm:0,nm:true}},$pull: {ifr:friend}});
             dbUsers.collection("users").update({username: friend},{$push: {friends: {name:user,id:rndhex,anm:0,nm:true}},$pull: {sfr:user}});
-            return callback(true)
+            callback(result.displayName);
         })
     }
 

@@ -23,14 +23,14 @@ html
                         input(type="submit" value="add")
                 ul
                     li(v-for="(friend, index) in friends" v-cloak)
-                        div.item-content(v-bind:class="{ active: currRoom[0] == friend[1]}")
-                            span(v-on:click='selectDm(index)' v-cloak) {{ friend[4] }}
+                        div.item-content(v-bind:class="{ active: currRoom[0] == friend.id}")
+                            span(v-on:click='selectDm(index)' v-cloak) {{ friend.displayName }}
                             span
-                                span(v-show='!friend[3]' v-cloak) {{ friend[2] }}
+                                span(v-show='!friend.nm' v-cloak) {{ friend.anm }}
                                 i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)' v-cloak) keyboard_arrow_up
                         transition(name='friend-menu-toggle')
-                            div.friend-menu.dropdown-menu(v-show='friend[5]')
-                                p {{ friend[0] }}
+                            div.friend-menu.dropdown-menu(v-show='friend.dropDownToggled')
+                                p {{ friend.name }}
                                 button(v-on:click='removeFriend(index)') remove
                 div.title-box
                     h3 Rooms
