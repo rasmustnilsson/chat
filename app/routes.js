@@ -16,7 +16,7 @@ module.exports = function(app,passport,io) {
         }
     }
     app.get('/', function(req, res) {
-        if (req.isAuthenticated()) {
+        if(req.isAuthenticated()) {
             res.render('index', pug.get({user:req.user,page:'index'}));
             if(req.session.errors) {
                 req.session.errors = {};

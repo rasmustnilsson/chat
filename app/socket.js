@@ -158,6 +158,17 @@ module.exports = function(app,io) {
                     }
                 })
             })
+            socket.on('createRoom', function(room) {
+                queries.rooms.createRoom(user.username,room,function(isCreated) {
+                    if(isCreated) {
+                        queries.rooms.joinRoom(user.username,room,function() {
+                            socket.emit('roomCreated',room);
+                        })
+                    } else {
+                        socket.emit('alert', 'Could not create room');
+                    }
+                })
+            })
             socket.on("message",function(room,sender,message) {
                 queries.newMessage(sender,room,message,Date.now(),function(bool) {
                     if(bool) {

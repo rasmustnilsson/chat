@@ -134,6 +134,8 @@ module.exports = {
                 if(err) throw err;
                 if(result == null) {
                     return callback(false);
+                } else if(result.bannedUsers.length == 0) {
+                    return callback(result);
                 }
                 for(var i=0;i<result.bannedUsers.length;i++) {
                     if(username == result.bannedUsers[i]) {
@@ -150,6 +152,17 @@ module.exports = {
             dbUsers.collection('users').update({username:username},{$pull: {rooms: [room,0,true]}}, function() {
                 callback();
             });
+        },
+        createRoom: function(admin,room,callback) {
+            this.roomExists(admin,room,function(doesExist) {
+                if(!doesExist) {
+                    dbRooms.collection('rooms').insertOne({name:room,users:[],bannedUsers:[],admin:admin,reg_date:Date.now()},function(err) {
+                        callback(true);
+                    })
+                } else {
+                    callback(false);
+                }
+            })
         }
     },
     cfr: function(user,friend,callback) { // cancels friend request
@@ -184,7 +197,6 @@ module.exports = {
             for(i = 0; i < result.friends.length; i++) {
                 if(result.friends[i].name == user) {
                     return callback(false, "already friends"); // if friend exists
-                    console.log(true)
                 }
             }
             for(j = 0;j<result.ifr.length;j++) {

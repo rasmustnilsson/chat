@@ -45,6 +45,7 @@ module.exports = function(passport,LocalStrategy) {
     function(req, username, password, done) {
         User.findOne({'username':  username}, function(err, user) {
             if (err) return done(err);
+            if(!req.session.errors) { req.session.errors = {} };
             if (!user) { // if no user is found, return the message
                 req.session.errors.loginFailed = true;
                 req.session.save();

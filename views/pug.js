@@ -29,13 +29,15 @@ module.exports = {
         } else {
             j.css.push('login.css');
             j.vueScript = 'login.js';
-            if(o.errors.createAccountFailed) {
-                j.createAccountError = true;
-            } else if(o.errors.loginFailed) {
-                j.wrongPassOrUsername = true;
-            }
-            if(o.errors.joinRoomFailed) {
-                j.joinRoomNotSignedIn = true;
+            if(o.errors) {
+                if(o.errors.createAccountFailed) {
+                    j.createAccountError = true;
+                } else if(o.errors.loginFailed) {
+                    j.wrongPassOrUsername = true;
+                }
+                if(o.errors.joinRoomFailed) {
+                    j.joinRoomNotSignedIn = true;
+                }
             }
         }
         return j;
