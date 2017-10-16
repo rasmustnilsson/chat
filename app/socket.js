@@ -61,7 +61,7 @@ module.exports = function(app,io) {
                 newRooms: []
             })
             for(var i=0;i<user.rooms.length;i++) {
-                socket.join(user.rooms[i][0]);
+                socket.join(user.rooms[i].name);
             }
             for(var i=0;i<user.friends.length;i++) {
                 socket.join(user.friends[i].id);
@@ -131,12 +131,12 @@ module.exports = function(app,io) {
             socket.on("confirmFriend", function(friend) { // confirms friend request
                 var rndhex = Math.floor(Math.random()*268435455).toString(16);
                 queries.afr(user.username,friend,rndhex,function(friendDisplayName) {
-                    socket.emit("fa",{name:friend,id:rndhex,anm:0,nm:true,displayName:friendDisplayName});
+                    socket.emit("fa",{name:friend,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:friendDisplayName});
                     socket.join(rndhex);
                     for(var i=0;i<users.length;i++) {
                         if(users[i].user == friend) {
                             users[i].newRooms.push(rndhex);
-                            socket.nsp.to(users[i].id).emit('newF', {name:user.username,id:rndhex,anm:0,nm:true,displayName:user.displayName});
+                            socket.nsp.to(users[i].id).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName});
                             break;
                         }
                     }

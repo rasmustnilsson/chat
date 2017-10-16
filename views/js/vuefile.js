@@ -3,7 +3,7 @@ var chatList = new Vue({
     data: {
         rooms: [],
         friends: [],
-        currRoom: ["default",0,true],
+        currRoom: "default",
         highlightedChat: 'default',
         addUserToggled: false,
         roomMenuToggled: false,
@@ -32,19 +32,21 @@ var chatList = new Vue({
             socket.emit('leaveRoom',room);
         },
         selectChat: function(index) {
-            this.currRoom = this.rooms[index];
-            Vue.set(this.rooms, index, [this.rooms[index][0],0,true]);
-            socket.emit("getMessages",this.currRoom[0]);
+            this.currRoom = this.rooms[index].name;
+            Vue.set(this.rooms, index, this.rooms[index]);
+            this.rooms[index].haveNoticedMsgs = true;
+            this.rooms[index].unNoticedMsgs = 0;
+            socket.emit("getMessages",this.currRoom);
         },
         removeFriend: function(index) {
             socket.emit('removeFriend',this.friends[index].name);
         },
 		selectDm: function(index) {
-            this.currRoom[0] = this.friends[index].id;
+            this.currRoom = this.friends[index].id;
             Vue.set(this.friends,index, this.friends[index]);
-            this.friends[index].anm = 0;
-            this.friends[index].nm = true;
-            socket.emit("getMessages",this.currRoom[0]);
+            this.friends[index].unNoticedMsgs = 0;
+            this.friends[index].haveNoticedMsgs = true;
+            socket.emit("getMessages",this.currRoom);
 		},
         toggleMenu: function(index, boolean) { // toggles the room and menus
             if(boolean) {
@@ -52,33 +54,33 @@ var chatList = new Vue({
                 this.friends[index].dropDownToggled = !this.friends[index].dropDownToggled;
             } else {
                 Vue.set(this.rooms,index,this.rooms[index]);
-                if(!this.rooms[index][3]) {
-                    this.rooms[index][3] = true;
+                if(!this.rooms[index].dropDownToggled) {
+                    this.rooms[index].dropDownToggled = true;
                 } else {
-                    this.rooms[index][3] = !this.rooms[index][3];
+                    this.rooms[index].dropDownToggled = !this.rooms[index].dropDownToggled;
                 }
             }
         },
         getInviteLink: function(index) {}, // WIP, will copy the invite link to clipboard
         showInviteLink: function(index) {
-            alert('localhost/joinRoom/' + this.rooms[index][0]);
+            alert('localhost/joinRoom/' + this.rooms[index].name);
         },
         addMessageNotification: function(room) {
-            if(this.currRoom[0] != room) {
+            if(this.currRoom != room) {
                 for(i=0;i<this.friends.length;i++) {
-                    if(this.friends[i].name == room) {
+                    if(this.friends[i].id == room) {
                         Vue.set(this.friends, i, this.friends[i]);
-                        this.friends[i].anm += 1;
-                        this.friends[i].anm = false;
+                        this.friends[i].unNoticedMsgs += 1;
+                        this.friends[i].haveNoticedMsgs = false;
                         i = this.friends.length;
                         return true;
                     }
                 }
                 for(j=0;j<this.rooms.length;j++) {
-                    if(this.rooms[j][0] == room) {
+                    if(this.rooms[j].name == room) {
                         Vue.set(this.rooms, j, this.rooms[j]);
-                        this.rooms[j][1] += 1;
-                        this.rooms[j][2] = false;
+                        this.rooms[j].unNoticedMsgs += 1;
+                        this.rooms[j].haveNoticedMsgs = false;
                         j = this.rooms.length;
                         return true;
                     }
@@ -156,7 +158,7 @@ var messageForm = new Vue({
     methods: {
         sendMessage: function() {
             if(this.message != "") {
-                message(chatList.currRoom[0],this.message);
+                message(chatList.currRoom,this.message);
                 this.message = "";
             }
         }

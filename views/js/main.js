@@ -16,14 +16,14 @@ socket.on("friend_requests", function(data) {
     }
 })
 socket.on("joinRoom", function(room) {
-    chatList.rooms.push([room,0,true]);
+    chatList.rooms.push({name: room, unNoticedMsgs: 0, nm: true});
 })
 socket.on('newFR', function(user) {
     friendRequests.ifr.push(user);
 })
 socket.on('leaveRoom', function(room) {
     for(i=0;i<chatList.rooms.length;i++) {
-        if(chatList.rooms[i][0] == room) {
+        if(chatList.rooms[i].name == room) {
             chatList.rooms.splice(i,1);
             i = chatList.rooms.length;
         }
@@ -40,7 +40,7 @@ socket.on('newF', function(user) { // when a user accepts your friend request
     socket.emit('jnR'); // joins new rooms
 })
 socket.on("messageFromServer", function(room, sender, message) {
-    if(room == chatList.currRoom[0]) {
+    if(room == chatList.currRoom) {
         if(sender == username) {
             chatMessages.addMessage([message,'user', sender]);
         } else {

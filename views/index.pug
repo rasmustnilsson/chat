@@ -23,10 +23,10 @@ html
                         input(type="submit" value="add")
                 ul
                     li(v-for="(friend, index) in friends" v-cloak)
-                        div.item-content(v-bind:class="{ active: currRoom[0] == friend.id}")
+                        div.item-content(v-bind:class="{ active: currRoom == friend.id}")
                             span(v-on:click='selectDm(index)' v-cloak) {{ friend.displayName }}
                             span
-                                span(v-show='!friend.nm' v-cloak) {{ friend.anm }}
+                                span(v-show='!friend.haveNoticedMsgs' v-cloak) {{ friend.unNoticedMsgs }}
                                 i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)' v-cloak) keyboard_arrow_up
                         transition(name='friend-menu-toggle')
                             div.friend-menu.dropdown-menu(v-show='friend.dropDownToggled')
@@ -46,13 +46,13 @@ html
                             input(type='submit' value='Create Room')
                 ul
                     li(v-for="(room, index) in rooms")
-                        div.item-content(v-bind:class="{ active: currRoom[0] == room[0]}")
-                            span(v-on:click='selectChat(index)' v-cloak) {{ room[0] }}
+                        div.item-content(v-bind:class="{ active: currRoom == room.name}")
+                            span(v-on:click='selectChat(index)' v-cloak) {{ room.name }}
                             span
-                                span(v-show='!room[2]' v-cloak) {{ room[1] }}
+                                span(v-show='!room.haveNoticedMsgs' v-cloak) {{ room.unNoticedMsgs }}
                                 i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,false)' v-cloak) keyboard_arrow_up
                         transition(name='room-menu-toggle')
-                            div.room-menu.dropdown-menu(v-show='room[3]')
+                            div.room-menu.dropdown-menu(v-show='room.dropDownToggled')
                                 p Users online: 3
                                 //button(v-on:click='getInviteLink(index)') copy invite link
                                 button(v-on:click='showInviteLink(index)') show invite link

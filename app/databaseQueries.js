@@ -121,7 +121,7 @@ module.exports = {
                                 return callback(false, "You have already joined the room.");
                             }
                         }
-                        dbUsers.collection('users').update({username:username},{$push: {rooms: [room,0,true]}}, function(err) {
+                        dbUsers.collection('users').update({username:username},{$push: {rooms: { name:room,unNoticedMsgs:0,haveNoticedMsgs:true } }}, function(err) {
                             if (err) throw err;
                             callback(true);
                         });
@@ -215,8 +215,8 @@ module.exports = {
     afr: function(user,friend,rndhex,callback) { // accepts friend request
         dbUsers.collection("users").findOne({username:friend}, function(err,result) {
             if(err) throw err;
-            dbUsers.collection("users").update({username: user},{$push: {friends: {name:friend,id:rndhex,anm:0,nm:true}},$pull: {ifr:friend}});
-            dbUsers.collection("users").update({username: friend},{$push: {friends: {name:user,id:rndhex,anm:0,nm:true}},$pull: {sfr:user}});
+            dbUsers.collection("users").update({username: user},{$push: {friends: {name:friend,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true}},$pull: {ifr:friend}});
+            dbUsers.collection("users").update({username: friend},{$push: {friends: {name:user,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true}},$pull: {sfr:user}});
             callback(result.displayName);
         })
     }
