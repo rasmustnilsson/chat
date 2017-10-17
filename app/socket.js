@@ -103,6 +103,7 @@ module.exports = function(app,io) {
             })
             socket.on('removeMember', function(room,member) {
                 queries.rooms.removeMember(user.username,room,member,function() {
+                    
                     socket.emit('removedMember',member);
                 })
             })

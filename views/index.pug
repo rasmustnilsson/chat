@@ -67,7 +67,7 @@ html
                                 //button(v-on:click='getInviteLink(index)') copy invite link
                                 button(v-on:click='showInviteLink(index)') show invite link
                                 button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') show members
-                                button(v-on:click='leaveRoom(room[0])' v-if='room.name != "default" && room.name != "memes"') Leave Room
+                                button(v-on:click='leaveRoom(room.name)' v-if='room.name != "default" && room.name != "memes"') Leave Room
             div#friend_requests
                 h3(v-bind:class="{'hidden': frh(ifr)}") Friend requests
                 ul

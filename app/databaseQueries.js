@@ -155,7 +155,7 @@ module.exports = {
                 if(result == null) {
                     return callback(false);
                 } else if(result.bannedUsers.length == 0) {
-                    return callback(result);
+                    return callback('result');
                 }
                 for(var i=0;i<result.bannedUsers.length;i++) {
                     if(username == result.bannedUsers[i]) {
@@ -169,7 +169,7 @@ module.exports = {
         },
         leaveRoom: function(username,room,callback) {
             dbRooms.collection('rooms').update({name: room},{$pull: {users:username}});
-            dbUsers.collection('users').update({username:username},{$pull: {rooms: [room,0,true]}}, function() {
+            dbUsers.collection('users').update({username:username},{$pull: {rooms: {name: room}}}, function() {
                 callback();
             });
         },

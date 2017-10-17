@@ -14,7 +14,8 @@ var membersMenu = new Vue({
             this.visible = !this.visible;
         },
         removeMember: function(member) {
-            socket.emit('removeMember',this.currentRoom,member);
+            console.log(this.currentRoom);
+            socket.emit('removeMember',this.currentRoom.name,member);
         },
     }
 })

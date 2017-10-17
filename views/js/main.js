@@ -16,7 +16,7 @@ socket.on("friend_requests", function(data) {
     }
 })
 socket.on("joinRoom", function(room) {
-    chatList.rooms.push({name: room, unNoticedMsgs: 0, nm: true});
+    chatList.rooms.push({name: room, unNoticedMsgs: 0, haveNoticedMsgs: true});
 })
 socket.on('newFR', function(user) {
     friendRequests.ifr.push(user);
