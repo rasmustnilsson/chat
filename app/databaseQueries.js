@@ -23,8 +23,8 @@ module.exports = {
                 function loop() { // loops through all the users and adds the nickname to the array, doesn't work with a normal loop
                     dbUsers.collection('users').findOne({username:result.friends[d].name},function(err,friendResult) {
                         result.friends[d].displayName = friendResult.displayName;
-                        if(d == result.friends.length-1) {
-                            d = result.friends.length;
+                        if(d==result.friends.length-1) {
+                            d=result.friends.length;
                             callback(result);
                         } else {
                             d++;
@@ -130,6 +130,23 @@ module.exports = {
                 } else {
                     callback(false,"The room does not exist.");
                 }
+            })
+        },
+        getMembers: function(username,room,callback) {
+            this.roomExists(username,room,function(result) {
+                if(!result) return callback(false);
+                dbRooms.collection('rooms').findOne({name:room},function(err,result) {
+                    callback(result.users.length > 1 ? result.users:false,
+                        result.admin == username);
+                })
+            })
+        },
+        removeMember: function(username,room,member,callback) {
+            this.roomExists(username,room,function(result) {
+                if(!result) return false;
+                dbRooms.collection('rooms').update({name:room},{$pull: {users: member}});
+                dbUsers.collection('users').update({username:member},{$pull: {rooms: {name: room}}});
+                callback();
             })
         },
         roomExists: function(username,room,callback) {

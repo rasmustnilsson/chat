@@ -56,6 +56,21 @@ socket.on("friends", function(users) {
         chatList.friends.push(users[i][1]);
     }
 })
+var a;
+socket.on('listOfMembers', function(members,isAdmin) { // loads the members of a specific room
+    membersMenu.listEmpty = false;
+    membersMenu.isAdmin = isAdmin;
+    membersMenu.membersInRoom = members;
+})
+socket.on('emptyListOfMembers', function() {
+    membersMenu.listEmpty = true;
+})
+socket.on('removedMember', function(member) {
+    if(membersMenu.membersInRoom.length == 2) {
+        membersMenu.listEmpty = true;
+    }
+    membersMenu.membersInRoom.splice(membersMenu.membersInRoom.indexOf(member),1);
+})
 socket.on("sfr", function(data) { // when friend request has been sent
     friendRequests.sfr.push(data);
 })
@@ -89,22 +104,18 @@ socket.on('friendRemoved',function(friend) {
 function message(room, message) {
     socket.emit("message", room, username, message);
 }
-
 function confirmFriend(friend) {
     socket.emit("confirmFriend", friend);
 }
 socket.on("createAccountFailed", function(data) {
     alert("Username: " + data + " already taken!");
 })
-
 function createAccount(user) {
     socket.emit("createAccount", user);
 }
-
 function alertMessage(message) { //alerts use when somethings goes wrong on server
     alert(message);
 }
-
 function buildChat(chat) {
     chatMessages.messages = [];
     for (i = 0; i < chat.length; i++) {
@@ -115,7 +126,6 @@ function buildChat(chat) {
         chatMessages.addMessage([chat[i].message, b, chat[i].sender]);
     }
 }
-
 function friendRequest(friend) {
     socket.emit("addFriend", friend);
 }

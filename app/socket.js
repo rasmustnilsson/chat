@@ -92,6 +92,20 @@ module.exports = function(app,io) {
                     }
                 }
             })
+            socket.on('getMembers',function(room) {
+                queries.rooms.getMembers(user.username,room,function(members, isAdmin) {
+                    if(members) {
+                        socket.emit('listOfMembers',members,isAdmin);
+                    } else {
+                        socket.emit('emptyListOfMembers');
+                    }
+                })
+            })
+            socket.on('removeMember', function(room,member) {
+                queries.rooms.removeMember(user.username,room,member,function() {
+                    socket.emit('removedMember',member);
+                })
+            })
             socket.on("getMessages", function(room) { // sends messages from specific chat
                 queries.get(room, function(msgs) {
                     socket.emit("chatMessages", msgs);

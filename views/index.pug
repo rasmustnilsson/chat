@@ -2,6 +2,16 @@ doctype html
 html
     include includes/head.pug
     body.logged_in
+        div.members-menu
+            transition(name='members-menu-toggle')
+                div(v-show='visible')
+                    h3(v-cloak) Members
+                    ul(v-show='!listEmpty')
+                        li(v-for='(member, index) in membersInRoom' v-cloak)
+                            span {{ member }}
+                            button(v-on:click='removeMember(member)' v-show="isAdmin") remove
+                    div(v-show='listEmpty')
+                        p there are no users in this group :{
         div.error_msg_box#errorMsg
             div.error_msg(v-for="(message, index) in messages" v-cloak)
                 transition(name='error_msg')
@@ -27,7 +37,7 @@ html
                             span(v-on:click='selectDm(index)' v-cloak) {{ friend.displayName }}
                             span
                                 span(v-show='!friend.haveNoticedMsgs' v-cloak) {{ friend.unNoticedMsgs }}
-                                i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)' v-cloak) keyboard_arrow_up
+                                i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)'  v-bind:class="{ 'icon-toggle': friend.dropDownToggled }" v-cloak) keyboard_arrow_up
                         transition(name='friend-menu-toggle')
                             div.friend-menu.dropdown-menu(v-show='friend.dropDownToggled')
                                 p {{ friend.name }}
@@ -50,13 +60,14 @@ html
                             span(v-on:click='selectChat(index)' v-cloak) {{ room.name }}
                             span
                                 span(v-show='!room.haveNoticedMsgs' v-cloak) {{ room.unNoticedMsgs }}
-                                i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,false)' v-cloak) keyboard_arrow_up
+                                i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,false)' v-bind:class="{ 'icon-toggle': room.dropDownToggled }" v-cloak) keyboard_arrow_up
                         transition(name='room-menu-toggle')
                             div.room-menu.dropdown-menu(v-show='room.dropDownToggled')
                                 p Users online: 3
                                 //button(v-on:click='getInviteLink(index)') copy invite link
                                 button(v-on:click='showInviteLink(index)') show invite link
-                                button(v-on:click='leaveRoom(room[0])') Leave Room
+                                button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') show members
+                                button(v-on:click='leaveRoom(room[0])' v-if='room.name != "default" && room.name != "memes"') Leave Room
             div#friend_requests
                 h3(v-bind:class="{'hidden': frh(ifr)}") Friend requests
                 ul

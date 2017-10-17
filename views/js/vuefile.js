@@ -1,3 +1,23 @@
+var membersMenu = new Vue({
+    el: ".members-menu",
+    data: {
+        visible: false,
+        listEmpty: true,
+        membersInRoom: [],
+        isAdmin: false,
+        currentRoom: '',
+    },
+    methods: {
+        toggleMenu: function(room) {
+            socket.emit('getMembers',room.name);
+            this.currentRoom = room;
+            this.visible = !this.visible;
+        },
+        removeMember: function(member) {
+            socket.emit('removeMember',this.currentRoom,member);
+        },
+    }
+})
 var chatList = new Vue({
     el: "#chatList",
     data: {
@@ -22,6 +42,9 @@ var chatList = new Vue({
             if(this.joinRoomInput) {
                 socket.emit('joinRoom', this.joinRoomInput);
             }
+        },
+        showMembers: function(index) {
+            membersMenu.toggleMenu(this.rooms[index]);
         },
         createRoom: function() {
             if(this.createRoomInput) {
