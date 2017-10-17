@@ -4,8 +4,8 @@ html
     body.logged_in
         div.members-menu
             transition(name='members-menu-toggle')
-                div(v-show='visible')
-                    h3(v-cloak) Members
+                div(v-show='visible' v-cloak)
+                    h3 Members
                     ul(v-show='!listEmpty')
                         li(v-for='(member, index) in membersInRoom' v-cloak)
                             span {{ member }}
@@ -68,7 +68,7 @@ html
                                 button(v-on:click='showInviteLink(index)') show invite link
                                 button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') show members
                                 button(v-on:click='leaveRoom(room.name)' v-if='room.name != "default" && room.name != "memes"') Leave Room
-            div#friend_requests
+            div#friend_requests(v-cloak)
                 h3(v-bind:class="{'hidden': frh(ifr)}") Friend requests
                 ul
                     li(v-for="(request,index) in ifr")
