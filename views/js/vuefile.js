@@ -2,20 +2,33 @@ var membersMenu = new Vue({
     el: ".members-menu",
     data: {
         visible: false,
-        listEmpty: true,
-        membersInRoom: [],
         isAdmin: false,
+        listEmpty: true,
+        banUserInput: '',
+        bannedUsers: [],
+        bannedUsersLoaded: false,
+        membersInRoom: [],
         currentRoom: '',
     },
     methods: {
         toggleMenu: function(room) {
             socket.emit('getMembers',room.name);
-            this.currentRoom = room;
             this.visible = !this.visible;
+            this.currentRoom = room;
         },
         removeMember: function(member) {
-            console.log(this.currentRoom);
             socket.emit('removeMember',this.currentRoom.name,member);
+        },
+        banUser: function() {
+            socket.emit('banUser',this.currentRoom.name,this.banUserInput);
+            this.banUserInput = '';
+        },
+        loadBannedUsers: function() {
+            this.bannedUsersLoaded = true;
+            socket.emit('getBannedUsers',this.currentRoom.name);
+        },
+        unban: function(user) {
+            socket.emit('unban',user,this.currentRoom.name);
         },
     }
 })

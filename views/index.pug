@@ -11,7 +11,18 @@ html
                             span {{ member }}
                             button(v-on:click='removeMember(member)' v-show="isAdmin") remove
                     div(v-show='listEmpty')
-                        p there are no users in this group :{
+                        p there are no users in this group :(
+                    div(v-if='isAdmin')
+                        h3 ban users
+                        form(onsubmit='return false' v-on:submit='banUser')
+                            input(type='text' placeholder='username' v-model='banUserInput')
+                            input(type='submit' value='ban')
+                        h3 View banned users
+                            button(v-on:click='loadBannedUsers') Load
+                        ul(v-show='bannedUsers.length != 0')
+                            li(v-for='(user, index) in bannedUsers') {{ user }}
+                                button(v-on:click='unban(user)') unban
+                        p(v-show='bannedUsers.length == 0 && bannedUsersLoaded') no user banned
         div.error_msg_box#errorMsg
             div.error_msg(v-for="(message, index) in messages" v-cloak)
                 transition(name='error_msg')
@@ -66,7 +77,7 @@ html
                                 p Users online: 3
                                 //button(v-on:click='getInviteLink(index)') copy invite link
                                 button(v-on:click='showInviteLink(index)') show invite link
-                                button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') show members
+                                button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') Members
                                 button(v-on:click='leaveRoom(room.name)' v-if='room.name != "default" && room.name != "memes"') Leave Room
             div#friend_requests(v-cloak)
                 h3(v-bind:class="{'hidden': frh(ifr)}") Friend requests

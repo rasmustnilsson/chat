@@ -80,7 +80,7 @@ module.exports = function(app,io) {
                 ifr:user.ifr,
                 nfr:user.nfr,
             });
-            queries.get("default", function(msgs) {
+            queries.messages.get("default", function(msgs) {
                 socket.emit("chatMessages", msgs);
             });
             socket.on('jnR', function() { // lets user join new room
@@ -93,34 +93,44 @@ module.exports = function(app,io) {
                 }
             })
             socket.on('getMembers',function(room) {
-                queries.rooms.getMembers(user.username,room,function(members, isAdmin) {
-                    if(members) {
-                        socket.emit('listOfMembers',members,isAdmin);
-                    } else {
-                        socket.emit('emptyListOfMembers');
-                    }
+                queries.rooms.getMembers(user.username,room,function(isInRoom,members,isAdmin) {
+                    if(!isInRoom) return socket.emit('alert','You are not in this room!');
+                    return socket.emit('listOfMembers',members,isAdmin);
                 })
             })
             socket.on('removeMember', function(room,member) {
                 queries.rooms.removeMember(user.username,room,member,function() {
-                    
                     socket.emit('removedMember',member);
                 })
             })
+            socket.on('banUser',function(room,bannedUser) { // bans a user from a specific room
+                queries.rooms.banUser(user.username,room,bannedUser,function(isUserBanned,info) {
+                    if(!isUserBanned) socket.emit('alert', info);
+                    socket.emit('userBanned',bannedUser);
+                })
+            })
+            socket.on('getBannedUsers',function(room) {
+                queries.rooms.getBannedUsers(user.username,room,function(list) {
+                    socket.emit('listOfBannedUsers',list);
+                })
+            })
+            socket.on('unban',function(unbannedUser,room) {
+                queries.rooms.unban(user.username,unbannedUser,room,function(isUnbanned,info) {
+                    if(!isUnbanned) return socket.emit('alert', info);
+                    socket.emit('userUnbanned',unbannedUser);
+
+                })
+            })
             socket.on("getMessages", function(room) { // sends messages from specific chat
-                queries.get(room, function(msgs) {
+                queries.messages.get(room, function(msgs) {
                     socket.emit("chatMessages", msgs);
                 });
             })
             socket.on('joinRoom', function(room) {
-                queries.rooms.joinRoom(user.username,room,function(roomExists) {
-                    if(roomExists) {
-                        socket.emit('joinRoom', room);
-                        socket.join(room);
-
-                    } else {
-                        socket.emit('alert', msg);
-                    }
+                queries.rooms.joinRoom(user.username,room,function(roomExists,msg) {
+                    if(!roomExists) return socket.emit('alert', msg);
+                    socket.emit('joinRoom', room);
+                    socket.join(room);
                 });
             })
             socket.on('leaveRoom', function(room) {
@@ -151,8 +161,7 @@ module.exports = function(app,io) {
                     for(var i=0;i<users.length;i++) {
                         if(users[i].user == friend) {
                             users[i].newRooms.push(rndhex);
-                            socket.nsp.to(users[i].id).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName});
-                            break;
+                            return socket.nsp.to(users[i].id).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName});
                         }
                     }
                 })
@@ -167,30 +176,21 @@ module.exports = function(app,io) {
                     socket.emit('friendRemoved',friend);
                     for(var i=0;i<users.length;i++) {
                         if(users[i].user == friend) {
-                            socket.nsp.to(users[i].id).emit('friendRemoved', user.username);
-                            i = users.length;
+                            return socket.nsp.to(users[i].id).emit('friendRemoved', user.username);
                         }
                     }
                 })
             })
             socket.on('createRoom', function(room) {
                 queries.rooms.createRoom(user.username,room,function(isCreated) {
-                    if(isCreated) {
-                        queries.rooms.joinRoom(user.username,room,function() {
-                            socket.emit('roomCreated',room);
-                        })
-                    } else {
-                        socket.emit('alert', 'Could not create room');
-                    }
+                    if(!isCreated) return socket.emit('alert', 'Could not create room');
+                    socket.emit('roomCreated',room);
                 })
             })
             socket.on("message",function(room,sender,message) {
-                queries.newMessage(sender,room,message,Date.now(),function(bool) {
-                    if(bool) {
-                        socket.nsp.to(room).emit('messageFromServer',room,sender,message);
-                    } else {
-                        socket.emit("alert", "Failed to send message!");
-                    }
+                queries.messages.new(sender,room,message,Date.now(),function(couldSend) {
+                    if(!couldSend) return socket.emit("alert", "Failed to send message!");
+                    socket.nsp.to(room).emit('messageFromServer',room,sender,message);
                 });
             })
         })

@@ -18,6 +18,16 @@ socket.on("friend_requests", function(data) {
 socket.on("joinRoom", function(room) {
     chatList.rooms.push({name: room, unNoticedMsgs: 0, haveNoticedMsgs: true});
 })
+socket.on('listOfBannedUsers',function(list) {
+    membersMenu.bannedUsers = list;
+})
+socket.on('userUnbanned',function(user,room) {
+    var index = membersMenu.bannedUsers.indexOf(user);
+    membersMenu.bannedUsers.splice(index,1);
+})
+socket.on('userBanned',function(user) {
+    if(membersMenu.bannedUsersLoaded) membersMenu.bannedUsers.push(user);
+})
 socket.on('newFR', function(user) {
     friendRequests.ifr.push(user);
 })
@@ -58,8 +68,9 @@ socket.on("friends", function(users) {
 })
 var a;
 socket.on('listOfMembers', function(members,isAdmin) { // loads the members of a specific room
-    membersMenu.listEmpty = false;
+    if(members.length == 0) return membersMenu.listEmpty = true;
     membersMenu.isAdmin = isAdmin;
+    membersMenu.listEmpty = false;
     membersMenu.membersInRoom = members;
 })
 socket.on('emptyListOfMembers', function() {

@@ -63,7 +63,7 @@ ul {
     margin: 4px 0;
 }
 #chatList i {
-    transition: all 0.2s;
+    transition: transform 0.2s;
 }
 .icon-toggle {
     transform: rotateX(180deg);
