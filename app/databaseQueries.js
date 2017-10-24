@@ -71,7 +71,7 @@ var queries = {
         },
         getProfilePicture: function(username,callback) { // returns url to profile picture
             dbUsers.findOne({username:username}, function(err,result) {
-                if(result.profile_picture_index == 0) {
+                if(!result || result.profile_picture_index == 0) {
                     callback("/views/pub_files/profile_pictures/default.png");
                 } else {
                     callback("/views/pub_files/"+username+"/profile_pictures/" + result.profile_pictures[result.profile_picture_index]);
@@ -119,7 +119,7 @@ var queries = {
                     for(var i=0;i<result.users.length;i++) {
                         if(result.users[i] == username) return callback(false, "You have already joined the room.");
                     }
-                    dbUsers.update({username:username},{$push: {rooms: { name:room,unNoticedMsgs:0,haveNoticedMsgs:true } }}, function(err) {
+                    dbUsers.update({username:username},{$push: {rooms: { name:room,unNoticedMsgs:0,haveNoticedMsgs:true,isMuted:false} }}, function(err) {
                         callback(true);
                     });
                     dbRooms.update({name:room},{$push: {users: username}});
@@ -138,11 +138,26 @@ var queries = {
             })
         },
         isInRoom: function(username,room,callback) {
+            if(room == 'default' || room == 'memes') return callback(true);
             dbRooms.findOne({name:room},function(err,result) {
                 if(err) throw err;
                 if(!result.users.includes(username)) return callback(false);
                 return callback(true);
             })
+        },
+        toggleMuteRoom: function(username,room,callback) {
+                this.isInRoom(username,room,function(result) {
+                    if(!result) return callback(true,false, 'You are not in this room!');
+                    dbUsers.findOne({username:username},{rooms: {$elemMatch: {name: room}}}, function(err,result) {
+                        if(!result.rooms[0].isMuted) {
+                            dbUsers.update({username:username,rooms: {$elemMatch: {name: room}}},{$set: {'rooms.$.isMuted': true}});
+                            return callback(false,true);
+                        }
+                        dbUsers.update({username:username,rooms: {$elemMatch: {name: room}}},{$set: {'rooms.$.isMuted': false}});
+                        callback(false,false);
+
+                    })
+                });
         },
         isBanned: function(username,room,callback) {
             dbRooms.findOne({name:room}, function(err,result) {

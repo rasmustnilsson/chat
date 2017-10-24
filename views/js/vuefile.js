@@ -65,6 +65,9 @@ var chatList = new Vue({
                 socket.emit('createRoom', this.createRoomInput);
             }
         },
+        muteRoom(room) {
+            socket.emit('muteRoom', room);
+        },
         leaveRoom: function(room) {
             socket.emit('leaveRoom',room);
         },

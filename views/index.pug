@@ -76,7 +76,9 @@ html
                             div.room-menu.dropdown-menu(v-show='room.dropDownToggled')
                                 p Users online: 3
                                 //button(v-on:click='getInviteLink(index)') copy invite link
-                                button(v-on:click='showInviteLink(index)') show invite link
+                                button(v-on:click='showInviteLink(index)') Invite link
+                                button(v-on:click='muteRoom(room)' v-if='room.isMuted') unMute
+                                button(v-on:click='muteRoom(room)' v-else) Mute
                                 button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') Members
                                 button(v-on:click='leaveRoom(room.name)' v-if='room.name != "default" && room.name != "memes"') Leave Room
             div#friend_requests(v-cloak)

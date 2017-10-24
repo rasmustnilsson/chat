@@ -16,7 +16,10 @@ var userSchema = mongoose.Schema({
         profile_pictures: {type: Array, default: ['default']},
         nfr: { type: Boolean, default: true },
         reg_date: { type: Date, default: Date.now },
-        rooms: {type: Array, default: [ {name: 'default', unNoticedMsgs: 0, haveNoticedMsgs: true},{name: 'memes', unNoticedMsgs: 0, haveNoticedMsgs: true} ]},
+        rooms: {type: Array, default: [
+            {name: 'default', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false},
+            {name: 'memes', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false}
+        ]},
 });
 
 userSchema.methods.generateHash = function(password) {

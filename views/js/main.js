@@ -35,7 +35,7 @@ socket.on('leaveRoom', function(room) {
     for(i=0;i<chatList.rooms.length;i++) {
         if(chatList.rooms[i].name == room) {
             chatList.rooms.splice(i,1);
-            i = chatList.rooms.length;
+            break;
         }
     }
 })
@@ -43,30 +43,26 @@ socket.on('newF', function(user) { // when a user accepts your friend request
     for(i=0;i<friendRequests.sfr.length;i++) {
         if(friendRequests.sfr[i] == user[0]) {
             friendRequests.sfr.splice(i,1);
-            i=friendRequests.sfr.length;
+            break;
         }
     }
     chatList.friends.push(user);
     socket.emit('jnR'); // joins new rooms
 })
 socket.on("messageFromServer", function(room, sender, message) {
+    var index = chatList.rooms.findIndex(x=> x.name == room);
+    if(chatList.rooms[index].isMuted) return true;
+    var u = (sender == username ? 'user': 'room');
     if(room == chatList.currRoom) {
-        if(sender == username) {
-            chatMessages.addMessage({message:message,user:'user', sender:sender});
-        } else {
-            chatMessages.addMessage({message:message,user:'room',sender:sender});
-
-        }
-    } else {
-        chatList.addMessageNotification(room);
+        return chatMessages.addMessage({message:message,user:u,sender:sender});
     }
+    chatList.addMessageNotification(room);
 })
 socket.on("friends", function(users) {
-    for (i = 0; i < users.length; i++) {
+    for (i=0;i<users.length;i++) {
         chatList.friends.push(users[i][1]);
     }
 })
-var a;
 socket.on('listOfMembers', function(members,isAdmin) { // loads the members of a specific room
     if(members.length == 0) return membersMenu.listEmpty = true;
     membersMenu.isAdmin = isAdmin;
@@ -75,6 +71,10 @@ socket.on('listOfMembers', function(members,isAdmin) { // loads the members of a
 })
 socket.on('emptyListOfMembers', function() {
     membersMenu.listEmpty = true;
+})
+socket.on('roomMuteToggeled',function(room,isMuted) {
+    var index = chatList.rooms.findIndex(x=> x.name == room.name);
+    chatList.rooms[index].isMuted = isMuted;
 })
 socket.on('removedMember', function(member) {
     if(membersMenu.membersInRoom.length == 2) {
@@ -98,8 +98,12 @@ socket.on("userinfo", function(data) { // initial user info
     chatList.rooms = data.rooms;
     chatList.friends = data.friends;
 })
-socket.on("chatMessages", function(data) { //builds chat
-        buildChat(data);
+socket.on("chatMessages", function(chat) { //builds chat
+    chatMessages.messages = [];
+    for (i = 0; i < chat.length; i++) {
+        var b = (chat[i].sender == username ? 'user':'room');
+        chatMessages.addMessage({message:chat[i].message, user:b, sender:chat[i].sender});
+    }
 })
 socket.on("alert", function(msg) {
     errorMessages.addMessage(msg);
@@ -108,7 +112,7 @@ socket.on('friendRemoved',function(friend) {
     for(i=0;i<chatList.friends.length;i++) {
         if(chatList.friends[i].name == friend) {
             chatList.friends.splice(i,1);
-            i = chatList.friends.length;
+            break;
         }
     }
 })
@@ -123,19 +127,6 @@ socket.on("createAccountFailed", function(data) {
 })
 function createAccount(user) {
     socket.emit("createAccount", user);
-}
-function alertMessage(message) { //alerts use when somethings goes wrong on server
-    alert(message);
-}
-function buildChat(chat) {
-    chatMessages.messages = [];
-    for (i = 0; i < chat.length; i++) {
-        var b = "room";
-        if (chat[i].sender == username) {
-            b = "user";
-        }
-        chatMessages.addMessage({message:chat[i].message, user:b, sender:chat[i].sender});
-    }
 }
 function friendRequest(friend) {
     socket.emit("addFriend", friend);

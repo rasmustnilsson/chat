@@ -138,6 +138,12 @@ module.exports = function(app,io) {
                     socket.emit('leaveRoom',room);
                 })
             })
+            socket.on('muteRoom', function(room) {
+                queries.rooms.toggleMuteRoom(user.username,room.name,function(err,isMuted,info) {
+                    if(!err) return socket.emit('roomMuteToggeled',room,isMuted);
+                    return socket.emit('alert',info);
+                })
+            })
             socket.on("addFriend", function(friend) { // sends friend request
                 queries.sfr(user.username,friend,function(bool,err) {
                     if(bool) {
