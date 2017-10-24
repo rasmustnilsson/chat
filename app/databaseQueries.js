@@ -252,10 +252,7 @@ var queries = {
         new: function(sender,room,message,time,callback) { // inserts a new message
             var o = {sender:sender,room:room,message:message,time:time};
             dbMessages.insertOne(o, function(err) {
-                if (err) {
-                    throw err;
-                    return callback(false);
-                }
+                if (err) return callback(false);
                 return callback(true);
             });
         },

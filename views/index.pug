@@ -94,9 +94,11 @@ html
                         button(v-on:click="cfr(index)") cancel
         section.chatWindow
             div#chatMessages.chatMessages
-                    div(v-for="(message, index) in messages" v-bind:class="[ {'consecutive': isConsecutive(message,index)}, message.user ]" class="message" v-cloak)
-                        img(v-bind:src="imgSrc(message.sender)" alt="Profile Picture" :class='message.user')
-                        span {{ message.message }}
+                    div.message(v-for="(message, index) in messages" v-bind:class="[ {'consecutive': isConsecutive(message,index)}, message.user ]" v-cloak)
+                        div.message-sender(v-if='!isConsecutive(message,index) && message.user != "user"') {{ message.sender }}
+                        div.message-container
+                            img(v-bind:src="imgSrc(message.sender)" alt="Profile Picture" :class='message.user')
+                            span(:title='message.time') {{ message.message }}
             form(id="messageForm" onsubmit="return false" v-on:submit="sendMessage" class="chat_input_form")
                 input(type="text" v-model="message" class="text_input" autofocus)
                 input(type="submit" value="send" class="button")

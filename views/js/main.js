@@ -1,6 +1,6 @@
 var socket = io.connect('/');
-let i, username,j,list;
-
+let i, username,j,list,
+months=["January","February","March","April","May","June","July","August","September","October","November","December"];
 socket.on("incoming_friend_requests", function(data) {
     for (i = 0; i < data.length; i++) {
         friendRequests.ifr.push(data[i]);
@@ -101,8 +101,13 @@ socket.on("userinfo", function(data) { // initial user info
 socket.on("chatMessages", function(chat) { //builds chat
     chatMessages.messages = [];
     for (i = 0; i < chat.length; i++) {
-        var b = (chat[i].sender == username ? 'user':'room');
-        chatMessages.addMessage({message:chat[i].message, user:b, sender:chat[i].sender});
+        var userOrRoom = (chat[i].sender == username ? 'user':'room');
+        var d = new Date(chat[i].time);
+        var time = d.toDateString() + ' ' + ("0" + d.getHours()).slice(-2) + ':' + ("0" + d.getMinutes()).slice(-2);
+        if(d.toDateString() === new Date().toDateString()) {
+            var time = ("0" + d.getHours()).slice(-2) + ':' + ("0" + d.getMinutes()).slice(-2);
+        }
+        chatMessages.addMessage({message:chat[i].message,user:userOrRoom,sender:chat[i].sender,time:time});
     }
 })
 socket.on("alert", function(msg) {
