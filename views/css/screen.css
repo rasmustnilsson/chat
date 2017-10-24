@@ -109,25 +109,34 @@ aside h3:first-of-type {
     flex-direction: column;
 }
 .message {
-    display: grid;
-    grid-template-areas: "img text empty";
-    justify-items: start;
-    grid-template-columns: auto auto 1fr;
+    display: flex;
+    height: 32px;
+    align-items: center;
+}
+.message span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: rgb(216, 216, 216);
+    margin-left: 2px;
+    margin-right: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.14);
 }
 body .user {
-    grid-template-columns: 1fr auto auto;
-    grid-template-areas: "empty text img";
-    justify-items: end;
+    flex-direction: row-reverse;
 }
 .message img {
     height: 28px;
     grid-area: img;
 }
-.message span {
-    grid-area: text;
+.consecutive img {
+    display: none;
 }
-div.user {
-    text-align: right;
+.consecutive span {
+    margin: 0 30px;
+}
+.user span {
+    background-color: blue;
+    color: white;
 }
 .hidden {
     display: none;

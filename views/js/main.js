@@ -52,9 +52,9 @@ socket.on('newF', function(user) { // when a user accepts your friend request
 socket.on("messageFromServer", function(room, sender, message) {
     if(room == chatList.currRoom) {
         if(sender == username) {
-            chatMessages.addMessage([message,'user', sender]);
+            chatMessages.addMessage({message:message,user:'user', sender:sender});
         } else {
-            chatMessages.addMessage([message,'room', sender]);
+            chatMessages.addMessage({message:message,user:'room',sender:sender});
 
         }
     } else {
@@ -134,7 +134,7 @@ function buildChat(chat) {
         if (chat[i].sender == username) {
             b = "user";
         }
-        chatMessages.addMessage([chat[i].message, b, chat[i].sender]);
+        chatMessages.addMessage({message:chat[i].message, user:b, sender:chat[i].sender});
     }
 }
 function friendRequest(friend) {

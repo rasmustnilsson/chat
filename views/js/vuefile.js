@@ -160,6 +160,12 @@ var chatMessages = new Vue({
                 chat.scrollTop = chat.scrollHeight;
             })
         },
+        isConsecutive: function(user,index) {
+            if(index > 0 && user.sender == this.messages[index-1].sender) {
+                return true;
+            }
+            return false;
+        },
         imgSrc: function(user) {
             return '/pub_files/profile_pictures/' + user;
         }
