@@ -112,17 +112,32 @@ var queries = {
         }
     },
     rooms: {
-        joinRoom: function(username,room,callback) {
+        joinRoom: function(username,room,id,callback) {
             this.roomExists(username,room,function(result) {
                 if(!result) return callback(false,"The room does not exist.");
-                dbRooms.findOne({name:room},function(err,result) {
-                    for(var i=0;i<result.users.length;i++) {
-                        if(result.users[i] == username) return callback(false, "You have already joined the room.");
+                queries.rooms.isInRoom(username,room,function(result,roomInfo) {
+                    if(result) return callback(false, "You are already in this room!");
+                    if(!id) {
+                        dbRooms.update({name:room},{$push: {users: username}});
+                        return dbUsers.update({username:username},{$push: {rooms: { name:room,unNoticedMsgs:0,haveNoticedMsgs:true,isMuted:false} }}, function(err) {
+                            callback(true);
+                        });
                     }
-                    dbUsers.update({username:username},{$push: {rooms: { name:room,unNoticedMsgs:0,haveNoticedMsgs:true,isMuted:false} }}, function(err) {
-                        callback(true);
-                    });
-                    dbRooms.update({name:room},{$push: {users: username}});
+                    for(var i=0;i<roomInfo.inviteLinkIds.length;) {
+                        if(roomInfo.inviteLinkIds[i].id == id && roomInfo.inviteLinkIds[i].expirationDate + 3600000 >= Date.now()) {
+                            dbRooms.update({name:room},{$push: {users: username}});
+                            return dbUsers.update({username:username},{$push: {rooms: { name:room,unNoticedMsgs:0,haveNoticedMsgs:true,isMuted:false} }}, function(err) {
+                                callback(true);
+                            });
+                        } else if(roomInfo.inviteLinkIds[i].id == id) {
+                            return dbRooms.update({name:room},{$pull: {inviteLinkIds: {id:id}}}, function() {
+                                callback(false, 'Your link has expired!');
+                            });
+                        } else {
+                            i++;
+                        }
+                    }
+                    callback(false, 'Your link has expired!');
                 })
             })
         },
@@ -141,8 +156,19 @@ var queries = {
             if(room == 'default' || room == 'memes') return callback(true);
             dbRooms.findOne({name:room},function(err,result) {
                 if(err) throw err;
-                if(!result.users.includes(username)) return callback(false);
-                return callback(true);
+                if(!result.users.includes(username)) return callback(false,result);
+                return callback(result);
+            })
+        },
+        createInviteLink: function(username,room,callback) {
+            this.isInRoom(username,room,function(result) {
+                if(!result) return callback(false, 'You are not in this room!');
+                if(result.invitesAllowed) {
+                    var rndhex = Math.floor(Math.random()*268435455).toString(16); // generates a random hex id
+                    dbRooms.update({name:room},{$push: {inviteLinkIds: {id:rndhex,expirationDate:Date.now()}}},function() {
+                        return callback(true,rndhex);
+                    })
+                }
             })
         },
         toggleMuteRoom: function(username,room,callback) {
@@ -237,8 +263,8 @@ var queries = {
         createRoom: function(admin,room,callback) { // creates a new room
             this.roomExists(admin,room,function(result) {
                 if(result) return callback(false);
-                dbRooms.insertOne({name:room,users:[],bannedUsers:[],admin:admin,reg_date:Date.now()},function(err) {
-                    queries.rooms.joinRoom(admin,room,function() { callback(); })
+                dbRooms.insertOne({name:room,users:[],bannedUsers:[],admin:admin,reg_date:Date.now(),invitesAllowed:true,inviteLinkIds:[]},function(err) {
+                    queries.rooms.joinRoom(admin,room,false,function() { callback(true); })
                 })
             })
         }

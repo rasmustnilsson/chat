@@ -41,7 +41,6 @@ var chatList = new Vue({
         highlightedChat: 'default',
         addUserToggled: false,
         roomMenuToggled: false,
-        joinRoomInput: '',
         createRoomInput: '',
         friend: '',
     },
@@ -50,11 +49,6 @@ var chatList = new Vue({
             if(this.friend != "") {
                 socket.emit("addFriend", this.friend);
                 this.friend = "";
-            }
-        },
-        joinRoom: function() {
-            if(this.joinRoomInput) {
-                socket.emit('joinRoom', this.joinRoomInput);
             }
         },
         showMembers: function(index) {
@@ -101,9 +95,8 @@ var chatList = new Vue({
                 }
             }
         },
-        getInviteLink: function(index) {}, // WIP, will copy the invite link to clipboard
-        showInviteLink: function(index) {
-            alert('localhost/joinRoom/' + this.rooms[index].name);
+        getInviteLink: function(room) {
+            inviteLink.toggleMenu(room.name);
         },
         addMessageNotification: function(room) {
             if(this.currRoom != room) {
@@ -208,5 +201,23 @@ var messageForm = new Vue({
                 this.message = "";
             }
         }
+    }
+})
+var inviteLink = new Vue({
+    el: '.invite-link',
+    data: {
+        visible: false,
+        url: '',
+    },
+    methods: {
+        toggleMenu: function(room) {
+            if(!this.visible) {
+                socket.emit('getInviteLink',room);
+            }
+            this.visible = !this.visible;
+        },
+        hideMenu: function() {
+            this.visible = false;
+        },
     }
 })

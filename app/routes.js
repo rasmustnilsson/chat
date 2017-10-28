@@ -86,13 +86,10 @@ module.exports = function(app,passport,io) {
             });
         })
     });
-    app.get('/joinRoom/:room',loggedIn, function(req,res) {
-        queries.rooms.joinRoom(req.user.username,req.params.room,function(couldJoin,msg) {
-            if(couldJoin) {
-                res.redirect('/');
-            } else {
-                res.send(msg);
-            }
+    app.get('/inviteLink/:room/:id',loggedIn, function(req,res) {
+        queries.rooms.joinRoom(req.user.username,req.params.room,req.params.id,function(couldJoin,msg) {
+            if(!couldJoin) return res.send(msg);
+            res.redirect('/');
         })
     })
 }

@@ -1,6 +1,7 @@
 var socket = io.connect('/');
 let i, username,j,list,
 months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
 socket.on("incoming_friend_requests", function(data) {
     for (i = 0; i < data.length; i++) {
         friendRequests.ifr.push(data[i]);
@@ -17,9 +18,13 @@ socket.on("friend_requests", function(data) {
 })
 socket.on("joinRoom", function(room) {
     chatList.rooms.push({name: room, unNoticedMsgs: 0, haveNoticedMsgs: true});
+    chatList.roomMenuToggled = false;
 })
 socket.on('listOfBannedUsers',function(list) {
     membersMenu.bannedUsers = list;
+})
+socket.on('inviteLink', function(info) {
+    inviteLink.url = document.location.href + info;
 })
 socket.on('userUnbanned',function(user,room) {
     var index = membersMenu.bannedUsers.indexOf(user);

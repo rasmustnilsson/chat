@@ -127,7 +127,7 @@ module.exports = function(app,io) {
                 });
             })
             socket.on('joinRoom', function(room) {
-                queries.rooms.joinRoom(user.username,room,function(roomExists,msg) {
+                queries.rooms.joinRoom(user.username,room,false,function(roomExists,msg) {
                     if(!roomExists) return socket.emit('alert', msg);
                     socket.emit('joinRoom', room);
                     socket.join(room);
@@ -156,7 +156,6 @@ module.exports = function(app,io) {
                     } else {
                         socket.emit("alert",err); //sends error
                     }
-
                 })
             })
             socket.on("confirmFriend", function(friend) { // confirms friend request
@@ -187,10 +186,17 @@ module.exports = function(app,io) {
                     }
                 })
             })
+            socket.on('getInviteLink', function(room) {
+                queries.rooms.createInviteLink(user.username,room,function(gotLink,info) {
+                    if(gotLink) return socket.emit('inviteLink','inviteLink/' + room + '/' + info);
+                    return socket.emit('alert',info);
+                });
+            })
             socket.on('createRoom', function(room) {
                 queries.rooms.createRoom(user.username,room,function(isCreated) {
                     if(!isCreated) return socket.emit('alert', 'Could not create room');
-                    socket.emit('roomCreated',room);
+                    socket.emit('joinRoom',room);
+                    socket.join(room);
                 })
             })
             socket.on("message",function(room,sender,message) {

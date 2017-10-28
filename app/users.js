@@ -17,8 +17,8 @@ var userSchema = mongoose.Schema({
         nfr: { type: Boolean, default: true },
         reg_date: { type: Date, default: Date.now },
         rooms: {type: Array, default: [
-            {name: 'default', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false},
-            {name: 'memes', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false}
+            {name: 'default', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false,invitesAllowed:false},
+            {name: 'memes', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false,invitesAllowed:false}
         ]},
 });
 

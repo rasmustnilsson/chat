@@ -57,10 +57,6 @@ html
                     h3 Rooms
                     i.material-icons(v-on:click='roomMenuToggled = !roomMenuToggled') add
                     div.roomMenu(v-show='roomMenuToggled' v-cloak)
-                        h4 join room
-                        form(onsubmit='return false' v-on:submit='joinRoom')
-                            input(type='text' v-model='joinRoomInput' placeholder='Room name')
-                            input(type='submit' value='Join Room')
                         h4 create room
                         form(onsubmit='return false' v-on:submit='createRoom')
                             input(type='text' v-model='createRoomInput' placeholder='Room name')
@@ -75,8 +71,7 @@ html
                         transition(name='room-menu-toggle')
                             div.room-menu.dropdown-menu(v-show='room.dropDownToggled')
                                 p Users online: 3
-                                //button(v-on:click='getInviteLink(index)') copy invite link
-                                button(v-on:click='showInviteLink(index)') Invite link
+                                button(v-on:click='getInviteLink(room)') Invite link
                                 button(v-on:click='muteRoom(room)' v-if='room.isMuted') unMute
                                 button(v-on:click='muteRoom(room)' v-else) Mute
                                 button(v-on:click='showMembers(index)' v-if='room.name != "default" && room.name != "memes"') Members
@@ -102,4 +97,8 @@ html
             form(id="messageForm" onsubmit="return false" v-on:submit="sendMessage" class="chat_input_form")
                 input(type="text" v-model="message" class="text_input" autofocus)
                 input(type="submit" value="send" class="button")
+        div.invite-link(v-cloak)
+            transition(name='invite-link-toggle')
+                div.invite-link-container(v-if='visible') {{ url }}
+                    i.material-icons(v-on:click='hideMenu') close
         include includes/bottom.pug
