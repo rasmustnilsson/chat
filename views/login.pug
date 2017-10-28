@@ -6,7 +6,7 @@ html
         h2 login
         - var loginRoute = 'login'
         if joinRoomNotSignedIn
-            - var loginRoute = '/login/joinRoom/' + room
+            - var loginRoute = '/login/inviteLink/' + room + '/' + id
             h3 You need to login to join a room
         if wrongPassOrUsername
             h3 Wrong password or username

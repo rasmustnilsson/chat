@@ -4,10 +4,10 @@ var queries = require("./databaseQueries");
 module.exports = function(app,passport,io) {
     function loggedIn(req,res,next) {
         if(!req.isAuthenticated()) {
-            if(req.route.path.split('/')[1] == 'joinRoom') {
+            if(req.route.path.split('/')[1] == 'inviteLink') {
                 req.session.errors.joinRoomFailed = true;
                 req.session.save();
-                res.render('login', pug.get({errors:req.session.errors,room:req.params.room}));
+                res.render('login', pug.get({errors:req.session.errors,room:req.params.room,id:req.params.id}));
             } else {
                 res.redirect('/');
             }
@@ -26,13 +26,13 @@ module.exports = function(app,passport,io) {
             res.render('login', pug.get({errors:req.session.errors}));
         }
     })
-    app.post('/login/joinRoom/:room', function(req,res,next) {
+    app.post('/login/inviteLink/:room/:id', function(req,res,next) {
         passport.authenticate('local-login', function(err,user) {
             if(err) return res.redirect('/');
-            if(!user) { return res.redirect('/joinRoom/' + req.params.room) }
+            if(!user) { return res.redirect('/inviteLink/' + req.params.room + '/' + req.params.id) }
             req.login(user,function(err) {
                 if(err) { return res.redirect('/') };
-                return res.redirect('/joinRoom/' + req.params.room);
+                return res.redirect('/inviteLink/' + req.params.room + '/' + req.params.id);
             })
         })(req,res,next);
     })

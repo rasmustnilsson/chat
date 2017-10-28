@@ -160,7 +160,17 @@ var queries = {
                 return callback(result);
             })
         },
+        removeExpiredInviteLinks: function(room) {
+            dbRooms.findOne({name:room},function(err,result) {
+                for(var i = 0;i<result.inviteLinkIds.length;i++) {
+                    if(result.inviteLinkIds[i].expirationDate + 3600000 <= Date.now()) {
+                        dbRooms.update({name:room},{$pull: {inviteLinkIds: {expirationDate:result.inviteLinkIds[i].expirationDate}}});
+                    }
+                }
+            })
+        },
         createInviteLink: function(username,room,callback) {
+            this.removeExpiredInviteLinks(room);
             this.isInRoom(username,room,function(result) {
                 if(!result) return callback(false, 'You are not in this room!');
                 if(result.invitesAllowed) {

@@ -10,6 +10,7 @@ module.exports = {
             joinRoomNotSignedIn: false,
             wrongPassOrUsername: false,
             room: o.room,
+            id: o.id,
         }
         if(o.page) {
             var page = o.page;
