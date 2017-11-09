@@ -83,6 +83,18 @@ header {
 .logout_form {
     display: inline-block;
 }
+.online-icon {
+    height: 16px;
+    width: 16px;
+    box-shadow: 0 0 2px #a8a8a8;
+    border-radius: 50%;
+}
+span.friend-offline {
+    background-color: red;
+}
+span.friend-online {
+    background-color: green;
+}
 aside {
     grid-area: rooms;
     padding: var(--default-padding);

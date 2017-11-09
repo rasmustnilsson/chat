@@ -279,11 +279,6 @@ var queries = {
             })
         }
     },
-    cfr: function(user,friend,callback) { // cancels friend request
-        dbUsers.update({username:user},{$pull: {sfr: friend}});
-        dbUsers.update({username:friend},{$pull: {ifr: user}});
-        return callback();
-    },
     messages: {
         new: function(sender,room,message,time,callback) { // inserts a new message
             var o = {sender:sender,room:room,message:message,time:time};
@@ -299,37 +294,51 @@ var queries = {
             })
         },
     },
-    sfr: function(user,friend,callback) { //sends friend requests
-        let j,i;
-        dbUsers.findOne({username: friend}, function(err,result) {
-            if(err) throw err;
-            if(!result) {
-                return callback(false, "user does not exist");
-            }
-            var fre = false // friend request exists
-            for(i = 0; i < result.friends.length; i++) {
-                if(result.friends[i].name == user) {
-                    return callback(false, "already friends"); // if friend exists
+    friends: {
+        cfr: function(user,friend,callback) { // cancels friend request
+            dbUsers.update({username:user},{$pull: {sfr: friend}});
+            dbUsers.update({username:friend},{$pull: {ifr: user}});
+            return callback();
+        },
+        sfr: function(user,friend,callback) { //sends friend requests
+            let j,i;
+            dbUsers.findOne({username: friend}, function(err,result) {
+                if(err) throw err;
+                if(!result) {
+                    return callback(false, "user does not exist");
                 }
-            }
-            for(j = 0;j<result.ifr.length;j++) {
-                if(result.ifr[j].name == user) {
-                    return callback(false, "friend request already sent"); //if request already sent
+                var fre = false // friend request exists
+                for(i = 0; i < result.friends.length; i++) {
+                    if(result.friends[i].name == user) {
+                        return callback(false, "already friends"); // if friend exists
+                    }
                 }
-            }
-            dbUsers.update({username: user},{$push: {sfr:friend}});
-            dbUsers.update({username: friend},{$push: {ifr:user}, $set: {noticed_friend_requests: false}});
-            return callback(true);
-        })
+                for(j = 0;j<result.ifr.length;j++) {
+                    if(result.ifr[j].name == user) {
+                        return callback(false, "friend request already sent"); //if request already sent
+                    }
+                }
+                dbUsers.update({username: user},{$push: {sfr:friend}});
+                dbUsers.update({username: friend},{$push: {ifr:user}, $set: {noticed_friend_requests: false}});
+                return callback(true);
+            })
+        },
+        isFriends: function(username,friend,callback) {
+            dbUsers.findOne({username:username},function(err,result) {
+                result.friends.forEach(function(user) {
+                    if(user.name == friend) return callback(true);
+                })
+                return callback(false);
+            })
+        },
+        afr: function(user,friend,rndhex,callback) { // accepts friend request
+            dbUsers.findOne({username:friend}, function(err,result) {
+                if(err) throw err;
+                dbUsers.update({username: user},{$push: {friends: {name:friend,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true}},$pull: {ifr:friend}});
+                dbUsers.update({username: friend},{$push: {friends: {name:user,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true}},$pull: {sfr:user}});
+                callback(result.displayName);
+            })
+        }
     },
-    afr: function(user,friend,rndhex,callback) { // accepts friend request
-        dbUsers.findOne({username:friend}, function(err,result) {
-            if(err) throw err;
-            dbUsers.update({username: user},{$push: {friends: {name:friend,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true}},$pull: {ifr:friend}});
-            dbUsers.update({username: friend},{$push: {friends: {name:user,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true}},$pull: {sfr:user}});
-            callback(result.displayName);
-        })
-    }
-
 }
 module.exports = queries;

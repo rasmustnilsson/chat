@@ -43,6 +43,7 @@ var chatList = new Vue({
         roomMenuToggled: false,
         createRoomInput: '',
         friend: '',
+        usersOnlineSockets: [],
     },
     methods: {
         sendFriendRequest: function() {
@@ -82,18 +83,22 @@ var chatList = new Vue({
             this.friends[index].haveNoticedMsgs = true;
             socket.emit("getMessages",this.currRoom);
 		},
-        toggleMenu: function(index, boolean) { // toggles the room and menus
-            if(boolean) {
+        toggleMenu: function(index, isFriend) { // toggles the room and menus
+            if(isFriend) {
                 Vue.set(this.friends,index, this.friends[index]);
-                this.friends[index].dropDownToggled = !this.friends[index].dropDownToggled;
-            } else {
-                Vue.set(this.rooms,index,this.rooms[index]);
-                if(!this.rooms[index].dropDownToggled) {
-                    this.rooms[index].dropDownToggled = true;
-                } else {
-                    this.rooms[index].dropDownToggled = !this.rooms[index].dropDownToggled;
-                }
+                return this.friends[index].dropDownToggled = !this.friends[index].dropDownToggled;
             }
+            Vue.set(this.rooms,index,this.rooms[index]);
+            if(!this.rooms[index].dropDownToggled) {
+                socket.emit('getUsersOnline',this.rooms[index].name);
+            }
+            if(!this.usersOnlineSockets.includes(this.rooms[index].name)) {
+                this.usersOnlineSockets.push(this.rooms[index].name);
+                socket.on('usersOnline_' + this.rooms[index].name, function(room,numberOfUserOnline) {
+                    chatList.rooms[chatList.rooms.findIndex(x=> x.name == room)].usersOnline = numberOfUserOnline;
+                })
+            }
+            this.rooms[index].dropDownToggled = !this.rooms[index].dropDownToggled;
         },
         getInviteLink: function(room) {
             inviteLink.toggleMenu(room.name);
@@ -122,6 +127,12 @@ var chatList = new Vue({
         }
     }
 })
+
+setInterval(function() {
+    chatList.friends.forEach(function(friend) {
+        socket.emit('isUserOnline', friend.name);
+    })
+},2000);
 var errorMessages = new Vue({
     el: '#errorMsg',
     data: {

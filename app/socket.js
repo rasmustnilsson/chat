@@ -1,7 +1,6 @@
-
-var queries = require("./databaseQueries");
+var socketStorage = require('./socketStorage'),
+    queries = require("./databaseQueries");
 let j;
-var users = [];
 
 module.exports = function(app,io) {
     var settingsPage = io.of('/settings');
@@ -35,62 +34,29 @@ module.exports = function(app,io) {
                 nfr:user.nfr,
             });
             socket.on("deleteProfilePicture", function(picture) { // deletes picture
-                queries.account.deleteProfilePicture(user.username,picture, function(bool,index,err) {
-                if(bool) {
-                    socket.emit('ppDeleted',true,index);
-                } else {
-                    socket.emit('ppDeleted',false,0,err);
-                }
-                })
+                queries.account.deleteProfilePicture(user.username,picture, function(isDeleted,index,err) {
+                if(isDeleted) return socket.emit('ppDeleted',true,index);
+                socket.emit('ppDeleted',false,0,err);
+            })
             })
         })
     })
     io.on('connection', function (socket) {
         socket.on('disconnect', function() {
-            for(var i=0;i<users.length;i++) {
-                if(users[i].id == socket.id) {
-                    users.splice(i,1);
-                    i = users.length;
-                }
-            }
+            socketStorage.removeUser(socket.id);
         })
         queries.account.getinfo(socket.handshake.session.passport.user, function(user) {
-            users.push({
-                user: user.username,
-                id: socket.id,
-                newRooms: []
-            })
-            for(var i=0;i<user.rooms.length;i++) {
-                socket.join(user.rooms[i].name);
-            }
-            for(var i=0;i<user.friends.length;i++) {
-                socket.join(user.friends[i].id);
-            }
-            var friends = []
-            for(var i=0;i<user.friends.length;i++) {
-                friends.push(user.friends[i]);
-                friends[i].dropDownToggled = false;
-            }
-            socket.emit("userinfo", {
-                username:user.username,
-                friends: friends,
-                rooms: user.rooms,
-                profile_picture: user.profile_pictures[user.profile_picture_index],
-                sfr:user.sfr,
-                ifr:user.ifr,
-                nfr:user.nfr,
+            socketStorage.addUser(user,socket.id,function(room) {
+                socket.join(room);
             });
+            socket.emit("userinfo", socketStorage.getUser(user.username));
             queries.messages.get("default", function(msgs) {
                 socket.emit("chatMessages", msgs);
             });
             socket.on('jnR', function() { // lets user join new room
-                for(var i=0;i<users.length;i++) {
-                    if(users[i].user == user.username) {
-                        for(j=0;j<users[i].newRooms.length;j++) {
-                            socket.join(users[i].newRooms[j]);
-                        }
-                    }
-                }
+                socketStorage.joinNewRooms(user.username,function(room) {
+                    socket.join(room);
+                })
             })
             socket.on('getMembers',function(room) {
                 queries.rooms.getMembers(user.username,room,function(isInRoom,members,isAdmin) {
@@ -102,6 +68,9 @@ module.exports = function(app,io) {
                 queries.rooms.removeMember(user.username,room,member,function() {
                     socket.emit('removedMember',member);
                 })
+            })
+            socket.on('getUsersOnline',function(room) {
+                socket.emit('usersOnline_' + room,room,socketStorage.getUsersOnline(user.username,room));
             })
             socket.on('banUser',function(room,bannedUser) { // bans a user from a specific room
                 queries.rooms.banUser(user.username,room,bannedUser,function(isUserBanned,info) {
@@ -145,46 +114,41 @@ module.exports = function(app,io) {
                 })
             })
             socket.on("addFriend", function(friend) { // sends friend request
-                queries.sfr(user.username,friend,function(bool,err) {
-                    if(bool) {
-                        socket.emit("sfr",friend);
-                        for(var i=0;i<users.length;i++) {
-                            if(users[i].user == friend) {
-                                socket.nsp.to(users[i].id).emit('newFR',user.username);
-                            }
-                        }
-                    } else {
-                        socket.emit("alert",err); //sends error
-                    }
+                queries.friends.sfr(user.username,friend,function(friendRequestSent,err) {
+                    if(!friendRequestSent) return socket.emit("alert",err); //sends error
+                    socket.emit("sfr",friend);
+                    friend = socketStorage.getUser(friend);
+                    return socket.nsp.to(friend.id).emit('newFR',user.username);
                 })
             })
             socket.on("confirmFriend", function(friend) { // confirms friend request
                 var rndhex = Math.floor(Math.random()*268435455).toString(16);
-                queries.afr(user.username,friend,rndhex,function(friendDisplayName) {
-                    socket.emit("fa",{name:friend,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:friendDisplayName});
-                    socket.join(rndhex);
-                    for(var i=0;i<users.length;i++) {
-                        if(users[i].user == friend) {
-                            users[i].newRooms.push(rndhex);
-                            return socket.nsp.to(users[i].id).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName});
-                        }
-                    }
+                queries.friends.afr(user.username,friend,rndhex,function(friendDisplayName) {
+                    socket.emit("fa",{name:friend,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:friendDisplayName,isOnline:false});
+                    socketStorage.joinRooms(user.username,[{name:rndhex}],function(room) {
+                        socket.join(room);
+                    })
+                    socketStorage.pushNewRoom(friend,rndhex);
+                    return socket.nsp.to(socketStorage.getUser(friend).id).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName,isOnline:false});
                 })
             })
             socket.on("cfr", function(friend) { // cancels friend request
-                queries.cfr(user.username,friend,function() {
+                queries.friends.cfr(user.username,friend,function() {
                     socket.emit("cpfr", friend);
                 });
             })
             socket.on('removeFriend', function(friend) {
                 queries.account.removeFriend(user.username,friend,function() {
                     socket.emit('friendRemoved',friend);
-                    for(var i=0;i<users.length;i++) {
-                        if(users[i].user == friend) {
-                            return socket.nsp.to(users[i].id).emit('friendRemoved', user.username);
-                        }
-                    }
+                    return socket.nsp.to(socketStorage.getUser(friend).id).emit('friendRemoved', user.username);
                 })
+            })
+            socket.on('isUserOnline', function(friend) {
+                if(friend == undefined) return false;
+                queries.friends.isFriends(user.username,friend,function(isFriends) {
+                    if(!isFriends) return false;
+                    socket.emit('isOnline',friend,socketStorage.isOnline(user.username,friend));
+                });
             })
             socket.on('getInviteLink', function(room) {
                 queries.rooms.createInviteLink(user.username,room,function(gotLink,info) {

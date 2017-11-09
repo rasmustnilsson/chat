@@ -12,9 +12,9 @@ var userSchema = mongoose.Schema({
         friends: [],
         sfr: [],
         ifr: [],
+        nfr: { type: Boolean, default: true },
         profile_picture_index: {type: Number, default:0},
         profile_pictures: {type: Array, default: ['default']},
-        nfr: { type: Boolean, default: true },
         reg_date: { type: Date, default: Date.now },
         rooms: {type: Array, default: [
             {name: 'default', unNoticedMsgs: 0, haveNoticedMsgs: true, isMuted:false,invitesAllowed:false},

@@ -46,6 +46,7 @@ html
                     li(v-for="(friend, index) in friends" v-cloak)
                         div.item-content(v-bind:class="{ active: currRoom == friend.id}")
                             span(v-on:click='selectDm(index)' v-cloak) {{ friend.displayName }}
+                            span.online-icon(v-bind:class=" { 'friend-offline': friend.isOnline == 0, 'friend-online': friend.isOnline == 1 }")
                             span
                                 span(v-show='!friend.haveNoticedMsgs' v-cloak) {{ friend.unNoticedMsgs }}
                                 i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,true)'  v-bind:class="{ 'icon-toggle': friend.dropDownToggled }" v-cloak) keyboard_arrow_up
@@ -69,8 +70,8 @@ html
                                 span(v-show='!room.haveNoticedMsgs' v-cloak) {{ room.unNoticedMsgs }}
                                 i.material-icons.user-settings-icon(v-on:click='toggleMenu(index,false)' v-bind:class="{ 'icon-toggle': room.dropDownToggled }" v-cloak) keyboard_arrow_up
                         transition(name='room-menu-toggle')
-                            div.room-menu.dropdown-menu(v-show='room.dropDownToggled')
-                                p Users online: 3
+                            div.room-menu.dropdown-menu(v-show='room.dropDownToggled' v-cloak)
+                                p Users online: {{ room.usersOnline }}
                                 button(v-on:click='getInviteLink(room)') Invite link
                                 button(v-on:click='muteRoom(room)' v-if='room.isMuted') unMute
                                 button(v-on:click='muteRoom(room)' v-else) Mute

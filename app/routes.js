@@ -6,8 +6,9 @@ module.exports = function(app,passport,io) {
         if(!req.isAuthenticated()) {
             if(req.route.path.split('/')[1] == 'inviteLink') {
                 req.session.errors.joinRoomFailed = true;
-                req.session.save();
-                res.render('login', pug.get({errors:req.session.errors,room:req.params.room,id:req.params.id}));
+                req.session.save(function() {
+                    res.render('login', pug.get({errors:req.session.errors,room:req.params.room,id:req.params.id}));
+                });
             } else {
                 res.redirect('/');
             }

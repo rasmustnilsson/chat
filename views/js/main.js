@@ -16,6 +16,9 @@ socket.on("friend_requests", function(data) {
         friendRequests.sfr.push(data[i]);
     }
 })
+socket.on('isOnline', function(friend,isOnline) {
+    for(var i=0;i<chatList.friends.length;i++) if(chatList.friends[i].username = friend) chatList.friends[i].isOnline = isOnline;
+})
 socket.on("joinRoom", function(room) {
     chatList.rooms.push({name: room, unNoticedMsgs: 0, haveNoticedMsgs: true});
     chatList.roomMenuToggled = false;
@@ -46,7 +49,7 @@ socket.on('leaveRoom', function(room) {
 })
 socket.on('newF', function(user) { // when a user accepts your friend request
     for(i=0;i<friendRequests.sfr.length;i++) {
-        if(friendRequests.sfr[i] == user[0]) {
+        if(friendRequests.sfr[i] == user.name) {
             friendRequests.sfr.splice(i,1);
             break;
         }
@@ -74,6 +77,10 @@ socket.on('listOfMembers', function(members,isAdmin) { // loads the members of a
     membersMenu.listEmpty = false;
     membersMenu.membersInRoom = members;
 })
+socket.on('usersOnline', function(room,usersOnline) {
+    var index = chatList.rooms.findIndex(x=> x.name == room);
+    chatList.rooms[index].usersOnline = usersOnline;
+})
 socket.on('emptyListOfMembers', function() {
     membersMenu.listEmpty = true;
 })
@@ -96,12 +103,14 @@ socket.on("fa", function(user) {
     friendRequests.ifr.splice(a, 1);
 })
 socket.on("userinfo", function(data) { // initial user info
-    chatList.friends = [];
     username = data.username;
     friendRequests.ifr = data.ifr;
     friendRequests.sfr = data.sfr;
     chatList.rooms = data.rooms;
     chatList.friends = data.friends;
+    chatList.friends.forEach(function(friend) {
+        socket.emit('isUserOnline', friend.name);
+    })
 })
 socket.on("chatMessages", function(chat) { //builds chat
     chatMessages.messages = [];
