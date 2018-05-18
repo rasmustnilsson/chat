@@ -19,6 +19,10 @@ var membersMenu = new Vue({
         removeMember: function(member) {
             socket.emit('removeMember',this.currentRoom.name,member);
         },
+        isNotUser: function(user) {
+                if(user == username) return false;
+                return true;
+        },
         banUser: function() {
             socket.emit('banUser',this.currentRoom.name,this.banUserInput);
             this.banUserInput = '';

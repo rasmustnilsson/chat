@@ -5,11 +5,13 @@ html
         div.members-menu
             transition(name='members-menu-toggle')
                 div(v-show='visible' v-cloak)
-                    h3 Members
+                    h2 {{ currentRoom.name }}
+                    h3 Members ({{ membersInRoom.length }})
                     ul(v-show='!listEmpty')
                         li(v-for='(member, index) in membersInRoom' v-cloak)
-                            span {{ member }}
-                            button(v-on:click='removeMember(member)' v-show="isAdmin") remove
+                            span {{ member }} 
+                                span(v-if="!isNotUser(member)") (You)
+                            button(v-on:click='removeMember(member)' v-show="isAdmin" v-if="isNotUser(member)") remove
                     div(v-show='listEmpty')
                         p there are no users in this group :(
                     div(v-if='isAdmin')
@@ -94,7 +96,7 @@ html
                         div.message-sender(v-if='!isConsecutive(message,index) && message.user != "user"') {{ message.sender }}
                         div.message-container
                             img(v-bind:src="imgSrc(message.sender)" alt="Profile Picture" :class='message.user')
-                            span(:title='message.time') {{ message.message }}
+                            span(:title='message.time' v-html='message.message')
             form(id="messageForm" onsubmit="return false" v-on:submit="sendMessage" class="chat_input_form")
                 input(type="text" v-model="message" class="text_input" autofocus)
                 input(type="submit" value="send" class="button")

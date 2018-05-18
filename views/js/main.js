@@ -72,7 +72,7 @@ socket.on("friends", function(users) {
     }
 })
 socket.on('listOfMembers', function(members,isAdmin) { // loads the members of a specific room
-    if(members.length == 0) return membersMenu.listEmpty = true;
+    if(!members) return membersMenu.listEmpty = true;
     membersMenu.isAdmin = isAdmin;
     membersMenu.listEmpty = false;
     membersMenu.membersInRoom = members;
@@ -112,6 +112,7 @@ socket.on("userinfo", function(data) { // initial user info
         socket.emit('isUserOnline', friend.name);
     })
 })
+var reg = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/;
 socket.on("chatMessages", function(chat) { //builds chat
     chatMessages.messages = [];
     for (i = 0; i < chat.length; i++) {
@@ -120,6 +121,10 @@ socket.on("chatMessages", function(chat) { //builds chat
         var time = d.toDateString() + ' ' + ("0" + d.getHours()).slice(-2) + ':' + ("0" + d.getMinutes()).slice(-2);
         if(d.toDateString() === new Date().toDateString()) {
             var time = ("0" + d.getHours()).slice(-2) + ':' + ("0" + d.getMinutes()).slice(-2);
+        }
+        if(reg.test(chat[i].message)) {
+            var link = chat[i].message.match(reg)[0];
+            chat[i].message = chat[i].message.replace(link,link.link(link));
         }
         chatMessages.addMessage({message:chat[i].message,user:userOrRoom,sender:chat[i].sender,time:time});
     }

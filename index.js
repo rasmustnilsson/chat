@@ -53,3 +53,7 @@ io.of('/settings').use(sharedsession(session, {
 var socket = require("./app/socket")(app,io);
 //Loads routes
 require('./app/routes.js')(app,passport,io,session);
+
+var reg = /.*gif|jpg|jpeg|png$/;
+var link = "https://media.giphy.com/media/26n8D1ENGxehUSrEQ/giphy.jpeg";
+console.log(1,reg.test(link));

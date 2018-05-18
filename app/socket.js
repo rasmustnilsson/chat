@@ -140,7 +140,7 @@ module.exports = function(app,io) {
             socket.on('removeFriend', function(friend) {
                 queries.account.removeFriend(user.username,friend,function() {
                     socket.emit('friendRemoved',friend);
-                    return socket.nsp.to(socketStorage.getUser(friend).id).emit('friendRemoved', user.username);
+                        return socket.nsp.to(socketStorage.getUser(friend).id).emit('friendRemoved', user.username);
                 })
             })
             socket.on('isUserOnline', function(friend) {
