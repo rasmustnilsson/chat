@@ -118,6 +118,7 @@ module.exports = function(app,io) {
                     if(!friendRequestSent) return socket.emit("alert",err); //sends error
                     socket.emit("sfr",friend);
                     friend = socketStorage.getUser(friend);
+                    if(!friend) return null;
                     return socket.nsp.to(friend.id).emit('newFR',user.username);
                 })
             })
@@ -129,7 +130,9 @@ module.exports = function(app,io) {
                         socket.join(room);
                     })
                     socketStorage.pushNewRoom(friend,rndhex);
-                    return socket.nsp.to(socketStorage.getUser(friend).id).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName,isOnline:false});
+                    friend = socketStorage.getUser(friend).id;
+                    if(!friend) return null;
+                    return socket.nsp.to(friend).emit('newF', {name:user.username,id:rndhex,unNoticedMsgs:0,haveNoticedMsgs:true,displayName:user.displayName,isOnline:false});
                 })
             })
             socket.on("cfr", function(friend) { // cancels friend request

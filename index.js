@@ -11,7 +11,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
-var server = app.listen(80);
+var server = app.listen(3001);
 var sharedsession = require("express-socket.io-session");
 var MongoStore = require('connect-mongo')(session);
 
@@ -54,6 +54,6 @@ var socket = require("./app/socket")(app,io);
 //Loads routes
 require('./app/routes.js')(app,passport,io,session);
 
-var reg = /.*gif|jpg|jpeg|png$/;
-var link = "https://media.giphy.com/media/26n8D1ENGxehUSrEQ/giphy.jpeg";
-console.log(1,reg.test(link));
+// var reg = /.*gif|jpg|jpeg|png$/;
+// var link = "https://media.giphy.com/media/26n8D1ENGxehUSrEQ/giphy.jpeg";
+// console.log(1,reg.test(link));
