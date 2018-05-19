@@ -59,7 +59,9 @@ socket.on('newF', function(user) { // when a user accepts your friend request
 })
 socket.on("messageFromServer", function(room, sender, message) {
     var index = chatList.rooms.findIndex(x=> x.name == room);
-    if(chatList.rooms[index].isMuted) return true;
+    if(index != -1) {
+       if(chatList.rooms[index].isMuted) return true; 
+    }    
     var u = (sender == username ? 'user': 'room');
     if(room == chatList.currRoom) {
         return chatMessages.addMessage({message:message,user:u,sender:sender});
