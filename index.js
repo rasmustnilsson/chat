@@ -34,6 +34,7 @@ require('./config/passport')(passport,LocalStrategy); // loads passport
 
 app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'views')));
+app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
