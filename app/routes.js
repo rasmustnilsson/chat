@@ -1,5 +1,7 @@
 var pug = require("../views/pug");
 var queries = require("./databaseQueries");
+const path = require("path");
+const shell = require("shelljs");
 
 module.exports = function(app,passport,io) {
     function loggedIn(req,res,next) {
@@ -80,7 +82,8 @@ module.exports = function(app,passport,io) {
         let uploadedFile = req.files.profile_picture;
         var rndhex = Math.floor(Math.random()*268435455).toString(16); // generates a random hex id
         uploadedFile.name = rndhex + '_' + uploadedFile.name;
-        uploadedFile.mv('views/pub_files/' + req.user.username + '/profile_pictures/' + uploadedFile.name, function(err) {
+	shell.mkdir('-p', __dirname + '/../views/pub_files/' + req.user.username + '/profile_pictures/');
+	uploadedFile.mv(path.join(__dirname + '/../views/pub_files/' + req.user.username + '/profile_pictures/' + uploadedFile.name), function(err) {
             if(err) return res.status(500).send(err);
             queries.account.uploadProfilePic(uploadedFile,req.user.username, function() {
                 res.send(true);
